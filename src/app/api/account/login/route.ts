@@ -1,0 +1,40 @@
+import { db } from "@/db";
+import { customers } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { verifyPassword, createCustomerToken } from "@/lib/customer-auth";
+
+export async function POST(request: Request) {
+  try {
+    const { email, password } = await request.json();
+    if (!email?.trim() || !password) {
+      return Response.json({ error: "يرجى إدخال البريد وكلمة المرور" }, { status: 400 });
+    }
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const [customer] = await db
+      .select()
+      .from(customers)
+      .where(eq(customers.email, normalizedEmail))
+      .limit(1);
+
+    if (!customer || !verifyPassword(String(password), customer.passwordHash)) {
+      return Response.json(
+        { error: "البريد الإلكتروني أو كلمة المرور غير صحيحة" },
+        { status: 401 },
+      );
+    }
+
+    const token = createCustomerToken(customer.id);
+    return Response.json({
+      token,
+      customer: {
+        id: customer.id,
+        name: customer.name,
+        email: customer.email,
+        phone: customer.phone,
+        city: customer.city,
+      },
+    });
+  } catch {
+    return Response.json({ error: "خطأ في الخادم" }, { status: 500 });
+  }
+}

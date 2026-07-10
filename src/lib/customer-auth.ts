@@ -1,0 +1,49 @@
+import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "crypto";
+
+const SECRET = process.env.ADMIN_SECRET || "velisia-super-secret-key-2026";
+
+export function hashPassword(password: string): string {
+  const salt = randomBytes(16).toString("hex");
+  const derived = scryptSync(password, salt, 64).toString("hex");
+  return `${salt}:${derived}`;
+}
+
+export function verifyPassword(password: string, stored: string): boolean {
+  const [salt, key] = stored.split(":");
+  if (!salt || !key) return false;
+  const derived = scryptSync(password, salt, 64);
+  const keyBuf = Buffer.from(key, "hex");
+  if (keyBuf.length !== derived.length) return false;
+  return timingSafeEqual(keyBuf, derived);
+}
+
+function sign(value: string): string {
+  return createHmac("sha256", SECRET).update(value).digest("hex");
+}
+
+export function createCustomerToken(customerId: number): string {
+  const payload = `cust.${customerId}.${Date.now()}`;
+  return `${payload}.${sign(payload)}`;
+}
+
+/** Returns the customer id if the token is valid, otherwise null. */
+export function verifyCustomerToken(
+  token: string | undefined | null,
+): number | null {
+  if (!token) return null;
+  const parts = token.split(".");
+  if (parts.length !== 4) return null;
+  const payload = `${parts[0]}.${parts[1]}.${parts[2]}`;
+  if (sign(payload) !== parts[3]) return null;
+  if (parts[0] !== "cust") return null;
+  const id = Number(parts[1]);
+  return Number.isFinite(id) ? id : null;
+}
+
+export function getCustomerIdFromRequest(request: Request): number | null {
+  const header = request.headers.get("authorization");
+  if (header?.startsWith("Bearer ")) {
+    return verifyCustomerToken(header.slice(7));
+  }
+  return null;
+}
