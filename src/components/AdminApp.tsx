@@ -12,7 +12,6 @@ import AdminProducts from "@/components/AdminProducts";
 import AdminOrders from "@/components/AdminOrders";
 import AdminMessages from "@/components/AdminMessages";
 
-const DEMO_PASSWORD = "velisia2026";
 
 type Tab = "dashboard" | "products" | "orders" | "messages";
 
@@ -192,18 +191,7 @@ function LoginView({ onLogin }: { onLogin: () => void }) {
             )}
             دخول
           </button>
-          <div className="rounded-xl bg-blush-50 p-3 text-center">
-            <p className="text-xs text-plum-900/60">كلمة المرور التجريبية:</p>
-            <button
-              type="button"
-              onClick={() => setPassword(DEMO_PASSWORD)}
-              className="mt-1.5 inline-flex items-center gap-1.5 rounded-lg border border-blush-200 bg-white px-3 py-1.5 font-mono text-sm font-bold tracking-wider text-blush-600 transition hover:bg-blush-100"
-              dir="ltr"
-            >
-              {DEMO_PASSWORD}
-              <span className="text-[10px]">اضغطي للتعبئة</span>
-            </button>
-          </div>
+      
           <Link href="/" className="block text-center text-xs text-plum-900/50 hover:text-blush-600">
             ← العودة للمتجر
           </Link>
