@@ -1,12 +1,17 @@
+
 import Link from "next/link";
 import Hero from "@/components/Hero";
 import ProductCarousel from "@/components/ProductCarousel";
 import { CATEGORIES } from "@/lib/constants";
 import { getBestsellers, getNewArrivals } from "@/lib/products";
+import { db } from "@/db";
+import { settings } from "@/db/schema";
 
 export const dynamic = "force-dynamic";
 
-const features = [
+type Feature = { icon: string; title: string; text: string };
+
+const defaultFeatures: Feature[] = [
   { icon: "🎧", title: "خدمة عملاء مميزة", text: "متاحة ٢٤/٧" },
   { icon: "📦", title: "توصيل سريع", text: "من ١ إلى ٣ أيام" },
   { icon: "🛡️", title: "منتجات أصلية ١٠٠٪", text: "جودة مضمونة" },
@@ -15,15 +20,18 @@ const features = [
 ];
 
 export default async function HomePage() {
-  const [bestsellers, newArrivals] = await Promise.all([
+  const [bestsellers, newArrivals, allSettings] = await Promise.all([
     getBestsellers(),
     getNewArrivals(),
+    db.select().from(settings),
   ]);
+
+  const trustBadgesRow = allSettings.find((s) => s.key === "trust_badges");
+  const features: Feature[] = (trustBadgesRow?.value as Feature[]) || defaultFeatures;
 
   return (
     <div>
       <Hero />
-
       {/* Category circles */}
       <section className="mx-auto -mt-6 max-w-7xl px-4">
         <div className="rounded-3xl border border-blush-100 bg-white p-6 shadow-lg shadow-blush-100/50">
@@ -88,7 +96,6 @@ export default async function HomePage() {
           </Link>
         </div>
       </section>
-
       {/* Bestsellers */}
       <section className="mx-auto mt-14 max-w-7xl px-4">
         <div className="mb-6 flex items-end justify-between">

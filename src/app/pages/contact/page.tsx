@@ -1,20 +1,30 @@
 import type { Metadata } from "next";
 import InfoPage from "@/components/InfoPage";
 import ContactForm from "@/components/ContactForm";
+import { db } from "@/db";
+import { settings } from "@/db/schema";
+
 
 export const metadata: Metadata = {
   title: "تواصلي معنا | velisiabeauty",
   description: "تواصلي مع فريق خدمة عملاء velisiabeauty — نحن هنا لمساعدتك.",
 };
 
-const channels = [
+type Channel = { icon: string; title: string; value: string; note?: string };
+
+const defaultChannels: Channel[] = [
   { icon: "📞", title: "اتصلي بنا", value: "٩٢٠ ٠٠٠ ٠٠٠", note: "من ٩ صباحاً حتى ١١ مساءً" },
   { icon: "✉️", title: "البريد الإلكتروني", value: "care@velisiabeauty.com", note: "نرد خلال ٢٤ ساعة" },
   { icon: "💬", title: "واتساب", value: "٠٥٠ ٠٠٠ ٠٠٠٠", note: "دعم فوري ٢٤/٧" },
   { icon: "📍", title: "الموقع", value: "الرياض، المملكة العربية السعودية", note: "المقر الرئيسي" },
 ];
 
-export default function ContactPage() {
+export default async function ContactPage() {
+  const allSettings = await db.select().from(settings);
+  const channelsRow = allSettings.find((s) => s.key === "contact_channels");
+  const channels: Channel[] = (channelsRow?.value as Channel[]) || defaultChannels;
+
+
   return (
     <InfoPage
       title="تواصلي معنا"
