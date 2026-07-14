@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState , useEffect } from "react";
+
 import { usePathname } from "next/navigation";
 import { CATEGORIES } from "@/lib/constants";
 
@@ -9,9 +10,11 @@ export default function Footer() {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   const pathname = usePathname();
-
+const [isAdmin, setIsAdmin] = useState(false);
   if (pathname?.startsWith("/admin")) return null;
-
+useEffect(() => {
+  setIsAdmin(localStorage.getItem("velisia_admin_key") === "true");
+}, []);
   return (
     <footer className="mt-16 bg-gradient-to-b from-plum-800 to-plum-900 text-blush-100">
       {/* Newsletter */}
@@ -97,8 +100,14 @@ export default function Footer() {
             <li><Link href="/pages/faq" className="transition hover:text-white">الأسئلة الشائعة</Link></li>
             <li><Link href="/pages/privacy" className="transition hover:text-white">سياسة الخصوصية</Link></li>
             <li><Link href="/pages/terms" className="transition hover:text-white">الشروط والأحكام</Link></li>
-            <li><Link href="/admin" className="transition hover:text-white">🔐 لوحة التحكم</Link></li>
-          </ul>
+<li>
+  <Link
+    href={isAdmin ? "/admin" : "/does-not-exist-9182"}
+    className="transition hover:text-white"
+  >
+    🔒 لوحة التحكم
+  </Link>
+</li>          </ul>
         </div>
       </div>
 
