@@ -7,6 +7,7 @@ export default function AdminLoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -54,8 +55,9 @@ if (data.ok) {      router.push("/admin");
         <label style={{ display: "block", marginBottom: "8px", fontSize: "14px" }}>
           كلمة السر
         </label>
+        <div style={{ position: "relative" }}>
         <input
-          type="password"
+          type={showPassword ? "text" : "password"}
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           style={{
@@ -70,6 +72,22 @@ if (data.ok) {      router.push("/admin");
           autoFocus
           required
         />
+        <button
+  type="button"
+  onClick={() => setShowPassword(!showPassword)}
+  style={{
+    position: "absolute",
+    left: "12px",
+    top: "38px",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    fontSize: "18px",
+  }}
+>
+  {showPassword ? "🙈" : "👁️"}
+</button>
+</div>
         {error && (
           <p style={{ color: "#d33", fontSize: "14px", marginBottom: "16px" }}>{error}</p>
         )}
