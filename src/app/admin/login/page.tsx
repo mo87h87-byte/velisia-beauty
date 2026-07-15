@@ -23,8 +23,7 @@ export default function AdminLoginPage() {
     const data = await res.json();
     setLoading(false);
 
-    if (data.success) {
-      router.push("/admin");
+if (data.ok) {      router.push("/admin");
       router.refresh();
     } else {
       setError("كلمة السر غير صحيحة");
