@@ -80,6 +80,13 @@ export const customers = pgTable("customers", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const loginAttempts = pgTable("login_attempts", {
+  id: serial("id").primaryKey(),
+  email: text("email").notNull(),
+  success: text("success").notNull().default("false"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export const settings = pgTable("settings", {
   id: serial("id").primaryKey(),
   key: text("key").notNull().unique(),

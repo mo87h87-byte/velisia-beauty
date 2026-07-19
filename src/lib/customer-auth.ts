@@ -1,4 +1,7 @@
 import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "crypto";
+import { db } from "@/db";
+import { loginAttempts } from "@/db/schema";
+import { eq, and, gt, sql } from "drizzle-orm";
 
 const SECRET = process.env.ADMIN_SECRET || "velisia-super-secret-key-2026";
 
@@ -46,4 +49,36 @@ export function getCustomerIdFromRequest(request: Request): number | null {
     return verifyCustomerToken(header.slice(7));
   }
   return null;
+}
+
+const MAX_ATTEMPTS = 5;
+const WINDOW_MINUTES = 15;
+
+/** Returns true if this email has hit the failed-login limit recently. */
+export async function isRateLimited(email: string): Promise<boolean> {
+  const normalizedEmail = email.trim().toLowerCase();
+  const windowStart = new Date(Date.now() - WINDOW_MINUTES * 60 * 1000);
+
+  const result = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(loginAttempts)
+    .where(
+      and(
+        eq(loginAttempts.email, normalizedEmail),
+        eq(loginAttempts.success, "false"),
+        gt(loginAttempts.createdAt, windowStart)
+      )
+    );
+
+  const failedCount = Number(result[0]?.count ?? 0);
+  return failedCount >= MAX_ATTEMPTS;
+}
+
+/** Records a login attempt (success or failure) for rate-limiting purposes. */
+export async function recordLoginAttempt(email: string, success: boolean): Promise<void> {
+  const normalizedEmail = email.trim().toLowerCase();
+  await db.insert(loginAttempts).values({
+    email: normalizedEmail,
+    success: success ? "true" : "false",
+  });
 }
