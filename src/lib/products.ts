@@ -30,6 +30,14 @@ export async function getNewArrivals(): Promise<Product[]> {
     .orderBy(desc(products.createdAt));
 }
 
+export async function getRecommended(): Promise<Product[]> {
+  return db
+    .select()
+    .from(products)
+    .where(eq(products.isRecommended, true))
+    .orderBy(desc(products.rating));
+}
+
 export async function getProductBySlug(
   slug: string,
 ): Promise<{ product: Product; reviews: Review[] } | null> {

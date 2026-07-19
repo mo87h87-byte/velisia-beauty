@@ -12,10 +12,20 @@
   --color-blush-800: #862f49;
   --color-blush-900: #722a41;
 
-  --color-rose-gold: #b76e79;
+  --color-plum-50: #fbf3f5;
+  --color-plum-100: #f5e3e8;
+  --color-plum-200: #ecc9d3;
+  --color-plum-300: #dba0b2;
+  --color-plum-400: #c06f8c;
+  --color-plum-500: #9c4869;
+  --color-plum-600: #7a3454;
+  --color-plum-700: #5e2740;
   --color-plum-800: #4a2233;
   --color-plum-900: #3a1a28;
+
+  --color-rose-gold: #b76e79;
   --color-champagne: #f3e4d6;
+  --color-gold: #c9a86a;
 
   --font-sans: var(--font-tajawal), system-ui, sans-serif;
   --font-display: var(--font-playfair), Georgia, serif;

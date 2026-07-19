@@ -20,6 +20,7 @@ interface FormState {
   slug: string;
   isFeatured: boolean;
   isBestseller: boolean;
+  isRecommended: boolean;
   isNew: boolean;
 }
 
@@ -36,6 +37,7 @@ const emptyForm: FormState = {
   slug: "",
   isFeatured: false,
   isBestseller: false,
+  isRecommended: false,
   isNew: true,
 };
 
@@ -48,6 +50,8 @@ export default function AdminProducts() {
   const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
     (async () => {
@@ -93,6 +97,7 @@ export default function AdminProducts() {
       slug: p.slug,
       isFeatured: p.isFeatured,
       isBestseller: p.isBestseller,
+      isRecommended: p.isRecommended,
       isNew: p.isNew,
     });
     setError("");
@@ -142,6 +147,26 @@ export default function AdminProducts() {
       if (res.ok) setProducts((prev) => prev.filter((p) => p.id !== id));
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const uploadImage = async (file: File) => {
+    setUploadError("");
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await adminFetch("/api/admin/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "فشل رفع الصورة");
+      setForm((prev) => ({
+        ...prev,
+        images: prev.images ? `${prev.images}\n${data.url}` : data.url,
+      }));
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "فشل رفع الصورة");
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -219,6 +244,7 @@ export default function AdminProducts() {
                     <div className="flex flex-wrap gap-1">
                       {p.isNew && <span className="rounded bg-blush-100 px-1.5 py-0.5 text-[10px] font-bold text-blush-600">جديد</span>}
                       {p.isBestseller && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-700">الأكثر مبيعاً</span>}
+                      {p.isRecommended && <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-700">قد يعجبك</span>}
                       {p.isFeatured && <span className="rounded bg-purple-100 px-1.5 py-0.5 text-[10px] font-bold text-purple-700">مميز</span>}
                     </div>
                   </td>
@@ -302,12 +328,30 @@ export default function AdminProducts() {
                 <textarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} rows={3} className={inp} />
               </Field>
               <Field label="روابط الصور (رابط في كل سطر)">
+                <div className="mb-2 flex items-center gap-3">
+                  <label className="cursor-pointer rounded-lg bg-blush-500 px-4 py-2 text-xs font-bold text-white transition hover:bg-blush-600">
+                    {uploading ? "جاري الرفع..." : "📷 ارفع صورة"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      disabled={uploading}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) uploadImage(file);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                  {uploadError && <span className="text-xs text-red-500">{uploadError}</span>}
+                </div>
                 <textarea value={form.images} onChange={(e) => setForm({ ...form, images: e.target.value })} rows={3} className={inp} dir="ltr" placeholder="https://..." />
               </Field>
               <div className="flex flex-wrap gap-4">
                 {[
                   { k: "isNew" as const, l: "جديد" },
                   { k: "isBestseller" as const, l: "الأكثر مبيعاً" },
+                  { k: "isRecommended" as const, l: "منتجات قد تعجبك" },
                   { k: "isFeatured" as const, l: "مميز" },
                 ].map((c) => (
                   <label key={c.k} className="flex items-center gap-2 text-sm font-semibold text-plum-900">

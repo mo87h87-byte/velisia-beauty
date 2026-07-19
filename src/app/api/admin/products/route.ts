@@ -54,6 +54,7 @@ export async function POST(request: Request) {
         stock: Number(b.stock) || 0,
         isFeatured: !!b.isFeatured,
         isBestseller: !!b.isBestseller,
+        isRecommended: !!b.isRecommended,
         isNew: !!b.isNew,
       })
       .returning();

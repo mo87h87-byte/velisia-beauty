@@ -25,6 +25,7 @@ export const products = pgTable("products", {
   stock: integer("stock").notNull().default(50),
   isFeatured: boolean("is_featured").notNull().default(false),
   isBestseller: boolean("is_bestseller").notNull().default(false),
+  isRecommended: boolean("is_recommended").notNull().default(false),
   isNew: boolean("is_new").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });

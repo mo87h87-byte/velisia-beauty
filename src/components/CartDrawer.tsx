@@ -73,12 +73,13 @@ export default function CartDrawer() {
             <p className="text-sm text-plum-900/60">
               اكتشفي تشكيلتنا الفاخرة وأضيفي منتجاتك المفضلة
             </p>
-            <button
+            <Link
+              href="/products"
               onClick={closeCart}
               className="rounded-full bg-gradient-to-l from-blush-500 to-blush-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90"
             >
               ابدئي التسوق
-            </button>
+            </Link>
           </div>
         ) : (
           <>

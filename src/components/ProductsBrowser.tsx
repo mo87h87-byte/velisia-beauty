@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { Product } from "@/db/schema";
 import ProductCard from "./ProductCard";
 import { CATEGORIES, SORT_OPTIONS, type SortKey } from "@/lib/constants";
-import { toNumber, discountPercent } from "@/lib/format";
+import { toNumber } from "@/lib/format";
 
 interface Props {
   products: Product[];
@@ -19,6 +19,9 @@ const priceRanges = [
   { key: "200-500", label: "٢٠٠ - ٥٠٠", min: 200, max: 500 },
   { key: "o500", label: "أكثر من ٥٠٠", min: 500, max: Infinity },
 ];
+
+const fallbackImage =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='500' height='500'%3E%3Crect width='500' height='500' fill='%23fbcfe8'/%3E%3C/svg%3E";
 
 export default function ProductsBrowser({
   products,
@@ -224,9 +227,29 @@ export default function ProductsBrowser({
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-              {filtered.map((p) => (
-                <ProductCard key={p.id} product={p} />
-              ))}
+              {filtered.map((p) => {
+                const price = toNumber(p.price);
+                const oldPrice = p.oldPrice ? toNumber(p.oldPrice) : undefined;
+                const discount =
+                  oldPrice && oldPrice > price
+                    ? Math.round((1 - price / oldPrice) * 100)
+                    : undefined;
+                return (
+                  <ProductCard
+                    key={p.id}
+                    id={p.id}
+                    slug={p.slug}
+                    name={p.name}
+                    brand={p.brand}
+                    price={price}
+                    oldPrice={oldPrice}
+                    discount={discount}
+                    rating={toNumber(p.rating)}
+                    image={p.images?.[0] || fallbackImage}
+                    link={`/products/${p.slug}`}
+                  />
+                );
+              })}
             </div>
           )}
         </div>
@@ -265,5 +288,3 @@ export default function ProductsBrowser({
     </div>
   );
 }
-
-

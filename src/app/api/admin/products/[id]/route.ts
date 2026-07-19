@@ -34,6 +34,7 @@ export async function PUT(
         stock: Number(b.stock) || 0,
         isFeatured: !!b.isFeatured,
         isBestseller: !!b.isBestseller,
+        isRecommended: !!b.isRecommended,
         isNew: !!b.isNew,
       })
       .where(eq(products.id, Number(id)))

@@ -34,7 +34,69 @@ export default function Header() {
   if (pathname?.startsWith("/admin")) return null;
 
   return (
-    <header className="sticky top-0 z-40 w-full">
+    <header className=" w-full">
+      {/* Pearl shimmer ring system (shared with homepage) */}
+      <style>{`
+        @keyframes pearlShimmer {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+        @keyframes pearlTwinkle {
+          0%, 100% { opacity: .25; transform: scale(0.6); }
+          50% { opacity: 1; transform: scale(1.2); }
+        }
+        .pearl-ring {
+          position: relative;
+        }
+        .pearl-ring::before {
+          content: "";
+          position: absolute;
+          inset: -3px;
+          border-radius: inherit;
+          padding: 3px;
+          background: linear-gradient(100deg,
+            #ffffff 0%, #f6e6ff 12%, #e0c3fc 24%,
+            #ffffff 38%, #ffd9ee 52%, #c9a8ff 66%,
+            #ffffff 80%, #f6e6ff 100%);
+          background-size: 300% 300%;
+          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+          -webkit-mask-composite: xor;
+          mask-composite: exclude;
+          animation: pearlShimmer 2.2s ease-in-out infinite;
+          filter: drop-shadow(0 0 8px rgba(230,180,255,0.75)) drop-shadow(0 0 16px rgba(200,150,255,0.4));
+          pointer-events: none;
+          z-index: 5;
+        }
+        .pearl-ring::after {
+          content: "✦";
+          position: absolute;
+          top: -9px;
+          right: 4px;
+          font-size: 11px;
+          line-height: 1;
+          color: #fff;
+          text-shadow: 0 0 6px #fff, 0 0 12px #d9b3ff;
+          animation: pearlTwinkle 2s ease-in-out infinite;
+          pointer-events: none;
+          z-index: 6;
+        }
+      `}</style>
+
+      {/* Top utility bar */}
+      <div className="hidden items-center justify-between bg-plum-900 px-4 py-1.5 text-[11px] text-white/80 md:flex">
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link href="/contact" className="hover:text-white">خدمة العملاء</Link>
+            <Link href="/account/orders" className="hover:text-white">تتبع الطلب</Link>
+          </div>
+          <div className="flex items-center gap-1">
+            <button className="hover:text-white">العربية</button>
+            <span>|</span>
+            <button className="hover:text-white">English</button>
+          </div>
+        </div>
+      </div>
       {/* Announcement bar */}
       <div className="bg-gradient-to-l from-plum-900 via-blush-800 to-plum-900 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-center gap-6 px-4 py-2 text-[11px] sm:text-xs">
@@ -53,7 +115,7 @@ export default function Header() {
           <button
             onClick={() => setMenuOpen((v) => !v)}
             aria-label="القائمة"
-            className="grid h-10 w-10 place-items-center rounded-full text-plum-900 lg:hidden"
+            className="pearl-ring grid h-10 w-10 place-items-center rounded-full text-plum-900 lg:hidden"
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M3 6h18M3 12h18M3 18h18" />
@@ -61,7 +123,10 @@ export default function Header() {
           </button>
 
           {/* Logo */}
-          <Link href="/" className="flex flex-col items-center leading-none">
+          <Link
+            href="/"
+            className="pearl-ring flex flex-col items-center rounded-2xl px-4 py-1.5 leading-none"
+          >
             <span className="brand-logo text-xl font-bold sm:text-2xl">velisiabeauty</span>
             <span className="mt-0.5 text-[9px] tracking-[0.3em] text-rose-gold">
               BEAUTY & CARE
@@ -73,7 +138,7 @@ export default function Header() {
             onSubmit={submitSearch}
             className="mx-auto hidden max-w-md flex-1 items-center md:flex"
           >
-            <div className="relative w-full">
+            <div className="pearl-ring relative w-full rounded-full">
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -95,7 +160,10 @@ export default function Header() {
 
           {/* Actions */}
           <div className="mr-auto flex items-center gap-1 sm:gap-3 md:mr-0">
-            <Link href="/account" className="hidden flex-col items-center px-2 text-plum-900 transition hover:text-blush-600 sm:flex">
+            <Link
+              href="/account"
+              className="pearl-ring hidden flex-col items-center rounded-xl px-2 py-1 text-plum-900 transition hover:text-blush-600 sm:flex"
+            >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
                 <circle cx="12" cy="8" r="4" />
                 <path d="M4 21c0-4 3.5-7 8-7s8 3 8 7" />
@@ -105,7 +173,7 @@ export default function Header() {
               </span>
             </Link>
 
-            <button className="relative hidden flex-col items-center px-2 text-plum-900 transition hover:text-blush-600 sm:flex">
+            <button className="pearl-ring relative hidden flex-col items-center rounded-xl px-2 py-1 text-plum-900 transition hover:text-blush-600 sm:flex">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
                 <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
               </svg>
@@ -115,7 +183,7 @@ export default function Header() {
 
             <button
               onClick={openCart}
-              className="relative flex flex-col items-center px-2 text-plum-900 transition hover:text-blush-600"
+              className="pearl-ring relative flex flex-col items-center rounded-xl px-2 py-1 text-plum-900 transition hover:text-blush-600"
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
                 <circle cx="9" cy="21" r="1" />
@@ -160,7 +228,7 @@ export default function Header() {
         <div className="border-b border-blush-100 bg-white lg:hidden">
           <div className="mx-auto max-w-7xl px-4 py-4">
             <form onSubmit={submitSearch} className="mb-4">
-              <div className="relative">
+              <div className="pearl-ring relative rounded-full">
                 <input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
