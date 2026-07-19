@@ -3,7 +3,13 @@ import { db } from "@/db";
 import { loginAttempts } from "@/db/schema";
 import { eq, and, gt, sql } from "drizzle-orm";
 
-const SECRET = process.env.ADMIN_SECRET || "velisia-super-secret-key-2026";
+const SECRET: string = (() => {
+  const value = process.env.ADMIN_SECRET;
+  if (!value) {
+    throw new Error("ADMIN_SECRET environment variable is not set");
+  }
+  return value;
+})();
 
 export function hashPassword(password: string): string {
   const salt = randomBytes(16).toString("hex");
