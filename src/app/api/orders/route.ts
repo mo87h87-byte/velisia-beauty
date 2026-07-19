@@ -50,7 +50,9 @@ export async function POST(request: Request) {
     const subtotal = cleanItems.reduce((s, i) => s + i.price * i.quantity, 0);
     const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
     const total = subtotal + shipping;
-    const orderNumber = `VLS-${Date.now().toString().slice(-8)}`;
+
+    const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
+    const orderNumber = `VLS-${Date.now().toString().slice(-6)}${randomPart}`;
 
     const [order] = await db
       .insert(orders)
