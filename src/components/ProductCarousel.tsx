@@ -45,7 +45,18 @@ export default function ProductCarousel({ products }: { products: Product[] }) {
             key={p.id}
             className="w-[75%] shrink-0 snap-start sm:w-[45%] md:w-[31%] lg:w-[23%]"
           >
-            <ProductCard product={p} />
+            <ProductCard
+              id={p.id}
+              slug={p.slug}
+              name={p.name}
+              brand={p.brand}
+              price={Number(p.price)}
+              oldPrice={p.oldPrice ? Number(p.oldPrice) : undefined}
+              discount={undefined}
+              rating={Number(p.rating)}
+              image={p.images?.[0] ?? ""}
+              link={`/products/${p.slug}`}
+            />
           </div>
         ))}
       </div>
