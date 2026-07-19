@@ -42,7 +42,19 @@ export default async function ProductPage({
           </h2>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {related.map((p) => (
-              <ProductCard key={p.id} product={p} />
+              <ProductCard
+                key={p.id}
+                id={p.id}
+                slug={p.slug}
+                name={p.name}
+                brand={p.brand}
+                price={Number(p.price)}
+                oldPrice={p.oldPrice ? Number(p.oldPrice) : undefined}
+                discount={undefined}
+                rating={Number(p.rating)}
+                image={p.images?.[0] ?? ""}
+                link={`/products/${p.slug}`}
+              />
             ))}
           </div>
         </section>
