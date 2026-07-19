@@ -134,6 +134,7 @@ function LoginView({ onLogin }: { onLogin: () => void }) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -173,14 +174,24 @@ function LoginView({ onLogin }: { onLogin: () => void }) {
             <h1 className="mt-2 text-lg font-bold text-plum-900">تسجيل دخول المشرف</h1>
             <p className="mt-1 text-xs text-plum-900/60">أدخلي كلمة المرور للوصول للوحة التحكم</p>
           </div>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="كلمة المرور"
-            className="w-full rounded-xl border border-blush-200 bg-white px-4 py-3 text-sm outline-none focus:border-blush-400"
-            autoFocus
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="كلمة المرور"
+              className="w-full rounded-xl border border-blush-200 bg-white px-4 py-3 pl-11 text-sm outline-none focus:border-blush-400"
+              autoFocus
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-lg"
+              aria-label={showPassword ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+            >
+              {showPassword ? "🙈" : "👁️"}
+            </button>
+          </div>
           {error && <p className="text-center text-sm text-red-500">{error}</p>}
           <button
             disabled={loading}
