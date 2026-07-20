@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import Script from "next/script";
 import { Tajawal, Playfair_Display } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/lib/cart-context";
@@ -31,6 +32,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
+      <link rel="stylesheet" href="https://cdn.moyasar.com/mysr/1.13.0/moyasar.css" />
       <body
         className={`${tajawal.variable} ${playfair.variable} font-sans antialiased`}
       >
@@ -42,6 +44,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <CartDrawer />
           </CartProvider>
         </AccountProvider>
+        <Script src="https://cdn.moyasar.com/mysr/1.13.0/moyasar.js" strategy="beforeInteractive" />
       </body>
     </html>
   );

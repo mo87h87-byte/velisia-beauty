@@ -1,26 +1,71 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { useAccount } from "@/lib/account-context";
 import { formatPrice } from "@/lib/format";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 
 const cities = [
-  "الرياض", "جدة", "مكة المكرمة", "المدينة المنورة", "الدمام",
-  "الخبر", "الطائف", "تبوك", "أبها", "بريدة", "حائل", "نجران",
+  // منطقة الرياض
+  "الرياض", "الخرج", "الدوادمي", "المجمعة", "الزلفي", "وادي الدواسر",
+  "الأفلاج", "حوطة بني تميم", "عفيف", "القويعية", "ضرما", "المزاحمية",
+  "شقراء", "رماح", "حريملاء", "الغاط",
+  // منطقة مكة المكرمة
+  "جدة", "مكة المكرمة", "الطائف", "رابغ", "القنفذة", "الليث",
+  "خليص", "الجموم", "الكامل", "تربة",
+  // منطقة المدينة المنورة
+  "المدينة المنورة", "ينبع", "العلا", "بدر", "خيبر", "الحناكية", "مهد الذهب",
+  // المنطقة الشرقية
+  "الدمام", "الخبر", "الظهران", "الأحساء", "القطيف", "الجبيل",
+  "الخفجي", "حفر الباطن", "النعيرية", "رأس تنورة", "بقيق",
+  // منطقة القصيم
+  "بريدة", "عنيزة", "الرس", "البكيرية", "المذنب", "رياض الخبراء", "الأسياح", "البدائع",
+  // منطقة عسير
+  "أبها", "خميس مشيط", "بيشة", "النماص", "محايل عسير", "رجال ألمع",
+  "ظهران الجنوب", "تنومة", "سراة عبيدة", "بلقرن",
+  // منطقة تبوك
+  "تبوك", "الوجه", "ضباء", "تيماء", "أملج", "حقل",
+  // منطقة حائل
+  "حائل", "بقعاء", "الغزالة", "الشنان",
+  // منطقة الحدود الشمالية
+  "عرعر", "رفحاء", "طريف",
+  // منطقة جازان
+  "جازان", "صبيا", "أبو عريش", "صامطة", "الدرب", "بيش", "فرسان", "العارضة",
+  // منطقة نجران
+  "نجران", "شرورة", "حبونا",
+  // منطقة الباحة
+  "الباحة", "بلجرشي", "المخواة", "المندق", "قلوة",
+  // منطقة الجوف
+  "سكاكا", "القريات", "دومة الجندل", "طبرجل",
 ];
+
+const DRAFT_KEY = "velisia_checkout_draft";
+
+declare global {
+  interface Window {
+    Moyasar?: {
+      init: (config: Record<string, unknown>) => void;
+    };
+  }
+}
 
 export default function CheckoutPage() {
   const { items, subtotal, shipping, total, clear } = useCart();
   const { customer } = useAccount();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   const [step, setStep] = useState<1 | 2>(1);
   const [payment, setPayment] = useState("cod");
   const [loading, setLoading] = useState(false);
   const [processingMsg, setProcessingMsg] = useState("");
   const [error, setError] = useState("");
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
+  const [verifyingCallback, setVerifyingCallback] = useState(false);
+  const mysrInitialized = useRef(false);
 
   const [form, setForm] = useState({
     customerName: "",
@@ -29,13 +74,6 @@ export default function CheckoutPage() {
     city: cities[0],
     address: "",
     notes: "",
-  });
-
-  const [card, setCard] = useState({
-    number: "",
-    name: "",
-    expiry: "",
-    cvv: "",
   });
 
   const update = (k: keyof typeof form, v: string) =>
@@ -54,34 +92,88 @@ export default function CheckoutPage() {
     }
   }, [customer]);
 
-  const setCardNumber = (v: string) => {
-    const digits = v.replace(/\D/g, "").slice(0, 16);
-    const formatted = digits.replace(/(.{4})/g, "$1 ").trim();
-    setCard((c) => ({ ...c, number: formatted }));
-  };
+  // Handle the return trip from Moyasar after a card payment attempt.
+  useEffect(() => {
+    const paymentId = searchParams.get("id");
+    const status = searchParams.get("status");
+    if (!paymentId || !status) return;
 
-  const setExpiry = (v: string) => {
-    const digits = v.replace(/\D/g, "").slice(0, 4);
-    const formatted =
-      digits.length > 2 ? `${digits.slice(0, 2)}/${digits.slice(2)}` : digits;
-    setCard((c) => ({ ...c, expiry: formatted }));
-  };
+    const finalize = async () => {
+      setVerifyingCallback(true);
+      setError("");
+      try {
+        const res = await fetch(`/api/payments/verify?id=${paymentId}`);
+        const data = await res.json();
 
-  const validateCard = (): string | null => {
-    const num = card.number.replace(/\s/g, "");
-    if (num.length < 16) return "رقم البطاقة غير صحيح";
-    if (!card.name.trim()) return "يرجى إدخال الاسم على البطاقة";
-    const [mm, yy] = card.expiry.split("/");
-    const month = Number(mm);
-    if (!mm || !yy || month < 1 || month > 12)
-      return "تاريخ انتهاء البطاقة غير صحيح";
-    const now = new Date();
-    const expDate = new Date(2000 + Number(yy), month - 1, 1);
-    if (expDate < new Date(now.getFullYear(), now.getMonth(), 1))
-      return "البطاقة منتهية الصلاحية";
-    if (card.cvv.replace(/\D/g, "").length < 3) return "رمز CVV غير صحيح";
-    return null;
-  };
+        if (!res.ok || !data.paid) {
+          setError("لم تكتمل عملية الدفع، يرجى المحاولة مرة أخرى");
+          setStep(2);
+          setPayment("card");
+          return;
+        }
+
+        const draftRaw = localStorage.getItem(DRAFT_KEY);
+        if (!draftRaw) {
+          setError("تعذر العثور على بيانات الطلب، يرجى المحاولة مرة أخرى");
+          return;
+        }
+        const draft = JSON.parse(draftRaw) as { form: typeof form; items: typeof items };
+
+        const orderRes = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...draft.form,
+            paymentMethod: "card",
+            paymentStatus: "paid",
+            items: draft.items,
+          }),
+        });
+        const orderData = await orderRes.json();
+        if (!orderRes.ok) throw new Error(orderData.error || "خطأ");
+
+        localStorage.removeItem(DRAFT_KEY);
+        setOrderNumber(orderData.order.orderNumber);
+        clear();
+        router.replace("/checkout");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "حدث خطأ أثناء تأكيد الدفع");
+      } finally {
+        setVerifyingCallback(false);
+      }
+    };
+
+    finalize();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Mount the Moyasar hosted card form once the shopper selects "card".
+  useEffect(() => {
+    if (payment !== "card" || step !== 2) {
+      mysrInitialized.current = false;
+      return;
+    }
+    if (mysrInitialized.current) return;
+    if (typeof window === "undefined" || !window.Moyasar) return;
+    if (!form.customerName || !form.email || !form.phone || !form.address) return;
+
+    // Save a draft so we can finalize the order after the Moyasar redirect.
+    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, items }));
+
+    mysrInitialized.current = true;
+    window.Moyasar.init({
+      element: ".mysr-form",
+      amount: Math.round(total * 100),
+      currency: "SAR",
+      description: `طلب من velisiabeauty — ${form.customerName}`,
+      publishable_api_key: process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY,
+      callback_url:
+        typeof window !== "undefined" ? `${window.location.origin}/checkout` : "",
+      methods: ["creditcard"],
+      language: "ar",
+    });
+  }, [payment, step, total, form, items]);
 
   const goPay = (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,26 +188,14 @@ export default function CheckoutPage() {
 
   const placeOrder = async () => {
     setError("");
-
-    // Validate the selected payment method before processing.
-    if (payment === "card") {
-      const cardError = validateCard();
-      if (cardError) {
-        setError(cardError);
-        return;
-      }
-    }
-
     setLoading(true);
     try {
-      // Simulate secure payment authorization for online methods.
+      // Simulate authorization for wallet-style methods (card is handled by Moyasar itself).
       if (payment !== "cod") {
         setProcessingMsg(
           payment === "applepay"
             ? "جاري التأكيد عبر Apple Pay..."
-            : payment === "stcpay"
-              ? "جاري التأكيد عبر STC Pay..."
-              : "جاري معالجة الدفع بشكل آمن...",
+            : "جاري التأكيد عبر STC Pay...",
         );
         await new Promise((r) => setTimeout(r, 1600));
       }
@@ -142,6 +222,16 @@ export default function CheckoutPage() {
       setProcessingMsg("");
     }
   };
+
+  // Verifying a return from Moyasar
+  if (verifyingCallback) {
+    return (
+      <div className="mx-auto flex max-w-2xl flex-col items-center px-4 py-24 text-center">
+        <span className="h-10 w-10 animate-spin rounded-full border-4 border-blush-300 border-t-blush-600" />
+        <p className="mt-6 text-plum-900/70">جاري التحقق من عملية الدفع...</p>
+      </div>
+    );
+  }
 
   // Success screen
   if (orderNumber) {
@@ -221,9 +311,7 @@ export default function CheckoutPage() {
                   <input type="email" value={form.email} onChange={(e) => update("email", e.target.value)} className={inputCls} placeholder="you@email.com" dir="ltr" />
                 </Field>
                 <Field label="المدينة *">
-                  <select value={form.city} onChange={(e) => update("city", e.target.value)} className={inputCls}>
-                    {cities.map((c) => <option key={c}>{c}</option>)}
-                  </select>
+                  <CityCombobox value={form.city} onChange={(v) => update("city", v)} />
                 </Field>
               </div>
               <Field label="العنوان التفصيلي *">
@@ -264,41 +352,10 @@ export default function CheckoutPage() {
                   ))}
                 </div>
                 {payment === "card" && (
-                  <div className="mt-4 grid gap-3 rounded-2xl bg-blush-50 p-4 sm:grid-cols-2">
-                    <input
-                      value={card.number}
-                      onChange={(e) => setCardNumber(e.target.value)}
-                      className={`${inputCls} sm:col-span-2`}
-                      placeholder="رقم البطاقة"
-                      dir="ltr"
-                      inputMode="numeric"
-                    />
-                    <input
-                      value={card.name}
-                      onChange={(e) => setCard((c) => ({ ...c, name: e.target.value }))}
-                      className={`${inputCls} sm:col-span-2`}
-                      placeholder="الاسم على البطاقة"
-                    />
-                    <input
-                      value={card.expiry}
-                      onChange={(e) => setExpiry(e.target.value)}
-                      className={inputCls}
-                      placeholder="MM / YY"
-                      dir="ltr"
-                      inputMode="numeric"
-                    />
-                    <input
-                      value={card.cvv}
-                      onChange={(e) =>
-                        setCard((c) => ({ ...c, cvv: e.target.value.replace(/\D/g, "").slice(0, 4) }))
-                      }
-                      className={inputCls}
-                      placeholder="CVV"
-                      dir="ltr"
-                      inputMode="numeric"
-                    />
-                    <p className="col-span-full flex items-center gap-1.5 text-xs text-plum-900/50">
-                      🔒 دفع آمن ومشفّر — بيئة تجريبية، لن يتم أي خصم فعلي.
+                  <div className="mt-4 rounded-2xl bg-blush-50 p-4">
+                    <div className="mysr-form" />
+                    <p className="mt-3 flex items-center gap-1.5 text-xs text-plum-900/50">
+                      🔒 بيانات بطاقتك تُرسل مباشرة إلى Moyasar بشكل آمن ومشفّر.
                     </p>
                   </div>
                 )}
@@ -335,20 +392,23 @@ export default function CheckoutPage() {
               </div>
 
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <button
-                onClick={placeOrder}
-                disabled={loading}
-                className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-blush-500 to-blush-600 py-4 text-base font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90 disabled:opacity-60"
-              >
-                {loading && (
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                )}
-                {loading
-                  ? processingMsg || "جاري تأكيد الطلب..."
-                  : payment === "cod"
-                    ? `تأكيد الطلب — ${formatPrice(total)}`
-                    : `ادفعي الآن — ${formatPrice(total)}`}
-              </button>
+
+              {payment !== "card" && (
+                <button
+                  onClick={placeOrder}
+                  disabled={loading}
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-blush-500 to-blush-600 py-4 text-base font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90 disabled:opacity-60"
+                >
+                  {loading && (
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  )}
+                  {loading
+                    ? processingMsg || "جاري تأكيد الطلب..."
+                    : payment === "cod"
+                      ? `تأكيد الطلب — ${formatPrice(total)}`
+                      : `ادفعي الآن — ${formatPrice(total)}`}
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -403,6 +463,72 @@ export default function CheckoutPage() {
 
 const inputCls =
   "w-full rounded-xl border border-blush-200 bg-white px-4 py-2.5 text-sm text-plum-900 outline-none transition focus:border-blush-400";
+
+function CityCombobox({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) {
+        setOpen(false);
+        setQuery("");
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const filtered = query.trim()
+    ? cities.filter((c) => c.includes(query.trim()))
+    : cities;
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        className={`${inputCls} flex items-center justify-between text-right`}
+      >
+        <span>{value}</span>
+        <span className="text-plum-900/40">▾</span>
+      </button>
+      {open && (
+        <div className="absolute z-20 mt-1 w-full overflow-hidden rounded-xl border border-blush-200 bg-white shadow-lg">
+          <input
+            autoFocus
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="ابحثي عن مدينتك..."
+            className="w-full border-b border-blush-100 px-4 py-2.5 text-sm outline-none"
+          />
+          <div className="max-h-56 overflow-y-auto">
+            {filtered.length === 0 && (
+              <p className="px-4 py-3 text-xs text-plum-900/50">لا توجد نتائج</p>
+            )}
+            {filtered.map((c) => (
+              <button
+                key={c}
+                type="button"
+                onClick={() => {
+                  onChange(c);
+                  setOpen(false);
+                  setQuery("");
+                }}
+                className={`block w-full px-4 py-2 text-right text-sm hover:bg-blush-50 ${
+                  c === value ? "bg-blush-50 font-bold text-blush-600" : "text-plum-900"
+                }`}
+              >
+                {c}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
