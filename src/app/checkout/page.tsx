@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { useAccount } from "@/lib/account-context";
@@ -52,7 +52,7 @@ declare global {
   }
 }
 
-export default function CheckoutPage() {
+function CheckoutPageInner() {
   const { items, subtotal, shipping, total, clear } = useCart();
   const { customer } = useAccount();
   const searchParams = useSearchParams();
@@ -536,5 +536,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span className="mb-1.5 block text-xs font-semibold text-plum-900">{label}</span>
       {children}
     </label>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={null}>
+      <CheckoutPageInner />
+    </Suspense>
   );
 }
