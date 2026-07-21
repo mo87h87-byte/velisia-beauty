@@ -32,7 +32,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="ar" dir="rtl">
-      <link rel="stylesheet" href="https://cdn.moyasar.com/mysr/1.13.0/moyasar.css" />
+      <head>
+        <link rel="stylesheet" href="https://cdn.moyasar.com/mpf/1.7.3/moyasar.css" />
+      </head>
       <body
         className={`${tajawal.variable} ${playfair.variable} font-sans antialiased`}
       >
@@ -44,7 +46,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <CartDrawer />
           </CartProvider>
         </AccountProvider>
-        <Script src="https://cdn.moyasar.com/mysr/1.13.0/moyasar.js" strategy="beforeInteractive" />
+        <Script src="https://cdn.moyasar.com/mpf/1.7.3/moyasar.js" strategy="beforeInteractive" />
       </body>
     </html>
   );

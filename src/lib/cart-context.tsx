@@ -88,6 +88,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
       /* ignore */
     }
     setHydrated(true);
+    // Safety net: force the cart drawer closed shortly after the app mounts,
+    // in case its open state was left true by a stale render/hot-reload.
+    setIsOpen(false);
   }, []);
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { useAccount } from "@/lib/account-context";
@@ -22,6 +22,7 @@ export default function Header() {
   const { customer } = useAccount();
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [wishlistCount, setWishlistCount] = useState(0);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -30,6 +31,28 @@ export default function Header() {
     router.push(`/products?q=${encodeURIComponent(query.trim())}`);
     setMenuOpen(false);
   };
+
+  useEffect(() => {
+    const updateWishlistCount = () => {
+      try {
+        const stored = localStorage.getItem("velisia_wishlist");
+        const ids = stored ? JSON.parse(stored) : [];
+        setWishlistCount(Array.isArray(ids) ? ids.length : 0);
+      } catch {
+        setWishlistCount(0);
+      }
+    };
+
+    updateWishlistCount();
+
+    window.addEventListener("storage", updateWishlistCount);
+    window.addEventListener("wishlist-updated", updateWishlistCount);
+
+    return () => {
+      window.removeEventListener("storage", updateWishlistCount);
+      window.removeEventListener("wishlist-updated", updateWishlistCount);
+    };
+  }, []);
 
   if (pathname?.startsWith("/admin")) return null;
 
@@ -173,13 +196,20 @@ export default function Header() {
               </span>
             </Link>
 
-            <button className="pearl-ring relative hidden flex-col items-center rounded-xl px-2 py-1 text-plum-900 transition hover:text-blush-600 sm:flex">
+            <Link
+              href="/wishlist"
+              className="pearl-ring relative hidden flex-col items-center rounded-xl px-2 py-1 text-plum-900 transition hover:text-blush-600 sm:flex"
+            >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
                 <path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z" />
               </svg>
               <span className="mt-0.5 text-[10px]">المفضلة</span>
-              <span className="absolute -top-1 right-1 grid h-4 w-4 place-items-center rounded-full bg-blush-500 text-[9px] font-bold text-white">2</span>
-            </button>
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 right-1 grid h-4 min-w-4 place-items-center rounded-full bg-blush-500 px-1 text-[9px] font-bold text-white">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
 
             <button
               onClick={openCart}
