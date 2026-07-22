@@ -44,6 +44,11 @@ const cities = [
 
 const DRAFT_KEY = "velisia_checkout_draft";
 
+const isValidSaudiPhone = (phone: string) => {
+  const cleaned = phone.replace(/[\s-]/g, "");
+  return /^(05\d{8}|\+9665\d{8}|9665\d{8})$/.test(cleaned);
+};
+
 declare global {
   interface Window {
     Moyasar?: {
@@ -180,6 +185,10 @@ function CheckoutPageInner() {
     setError("");
     if (!form.customerName || !form.email || !form.phone || !form.address) {
       setError("يرجى تعبئة جميع الحقول المطلوبة");
+      return;
+    }
+    if (!isValidSaudiPhone(form.phone)) {
+      setError("يرجى إدخال رقم جوال سعودي صحيح (مثال: 05xxxxxxxx)");
       return;
     }
     setStep(2);
