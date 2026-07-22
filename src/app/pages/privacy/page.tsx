@@ -49,7 +49,7 @@ export default function PrivacyPage() {
       <Section title="حقوقك">
         <p>
           يحق لكِ الوصول إلى بياناتك أو تعديلها أو طلب حذفها في أي وقت. للاستفسار
-          حول خصوصيتك، تواصلي معنا عبر <strong>care@velisiabeauty.com</strong>.
+          حول خصوصيتك، تواصلي معنا عبر <strong>mo87h87@gmail.com</strong>.
         </p>
       </Section>
     </InfoPage>

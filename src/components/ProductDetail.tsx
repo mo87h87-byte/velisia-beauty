@@ -131,6 +131,9 @@ export default function ProductDetail({
               </span>
             )}
           </div>
+          <p className="mt-1 text-xs text-plum-900/50">
+            السعر شامل ضريبة القيمة المضافة
+          </p>
 
           <div className="mt-3 flex items-center gap-2 text-sm">
             {product.stock > 0 ? (
