@@ -1,12 +1,14 @@
 import Link from "next/link";
 import { db } from "@/db";
-import { settings } from "@/db/schema";
+import { settings, testimonials } from "@/db/schema";
 import type { Product } from "@/db/schema";
 import { getBestsellers, getNewArrivals, getRecommended } from "@/lib/products";
+import { desc, eq } from "drizzle-orm";
 import StarRating from "@/components/StarRating";
 import WishlistButton from "@/components/WishlistButton";
 import ProductQuickActions from "@/components/ProductQuickActions";
 import NewsletterForm from "@/components/NewsletterForm";
+import TestimonialsSection from "@/components/TestimonialsSection";
 import { RotateCcw, Truck, ShieldCheck, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -51,9 +53,6 @@ const iconHair = placeholderImage("شعر", "#f0abfc", "#a21caf");
 const iconMakeup = placeholderImage("مكياج", "#fda4af", "#9f1239");
 const iconPerfume = placeholderImage("عطور", "#c4b5fd", "#6d28d9");
 const iconNails = placeholderImage("أظافر", "#f9a8d4", "#831843");
-const avatar1 = placeholderImage("س", "#f9a8d4", "#831843");
-const avatar2 = placeholderImage("م", "#c4b5fd", "#581c47");
-const avatar3 = placeholderImage("ر", "#fda4af", "#9f1239");
 const p1 = placeholderImage("زيت شعر", "#f472b6", "#831843");
 const p2 = placeholderImage("كريم بشرة", "#f9a8d4", "#9f1239");
 const p3 = placeholderImage("عطر", "#c4b5fd", "#581c47");
@@ -128,38 +127,6 @@ const defaultPromoBanners: PromoBanner[] = [
     buttonText: "تسوقي الآن",
     buttonLink: "/products",
     image: truckImg,
-  },
-];
-
-type Testimonial = {
-  id: number;
-  name: string;
-  rating: number;
-  comment: string;
-  avatar?: string;
-};
-
-const defaultTestimonials: Testimonial[] = [
-  {
-    id: 1,
-    name: "سارة أحمد",
-    rating: 5,
-    comment: "منتجات رائعة وجودة عالية، التوصيل كان سريع جداً",
-    avatar: avatar1,
-  },
-  {
-    id: 2,
-    name: "منى خالد",
-    rating: 5,
-    comment: "تجربة تسوق ممتازة، هرجع أطلب تاني أكيد",
-    avatar: avatar2,
-  },
-  {
-    id: 3,
-    name: "ريم عبدالله",
-    rating: 4,
-    comment: "خدمة عملاء محترمة والمنتجات أصلية 100%",
-    avatar: avatar3,
   },
 ];
 
@@ -297,18 +264,19 @@ export default async function HomePage() {
   const promoData = promoRow?.value as { banners?: PromoBanner[] } | undefined;
   const promoBanners = promoData?.banners?.length ? promoData.banners : defaultPromoBanners;
 
-  const testimonialsRow = allSettings.find((s) => s.key === "testimonials");
-  const testimonialsData = testimonialsRow?.value as { items?: Testimonial[] } | undefined;
-  const testimonials = testimonialsData?.items?.length ? testimonialsData.items : defaultTestimonials;
-
   const featuresRow = allSettings.find((s) => s.key === "features");
   const featuresData = featuresRow?.value as { items?: FeatureItem[] } | undefined;
   const features = featuresData?.items?.length ? featuresData.items : defaultFeatures;
 
-  const [dbBestsellers, dbNewArrivals, dbRecommended] = await Promise.all([
+  const [dbBestsellers, dbNewArrivals, dbRecommended, dbTestimonials] = await Promise.all([
     getBestsellers(),
     getNewArrivals(),
     getRecommended(),
+    db
+      .select()
+      .from(testimonials)
+      .where(eq(testimonials.isVisible, true))
+      .orderBy(desc(testimonials.isPinned), desc(testimonials.createdAt)),
   ]);
 
   const bestsellers: GridItem[] = dbBestsellers.length
@@ -611,35 +579,14 @@ export default async function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="relative z-10 mx-auto max-w-7xl px-4 py-12">
-        <div className="mb-8 flex justify-center">
-          <h2 className="pearl-ring relative inline-block rounded-2xl bg-gradient-to-br from-[#f3e5c9] via-[#e8c98f] to-[#d9ad6a] px-7 py-3 text-xl font-extrabold text-plum-900 shadow-[0_10px_20px_-6px_rgba(88,28,80,0.4),inset_0_2px_0_rgba(255,255,255,0.6),inset_0_-3px_6px_rgba(120,80,20,0.35)] ring-1 ring-[#c9a86a]/40 md:text-2xl">
-            آراء عملائنا
-          </h2>
-        </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
-          {testimonials.map((t) => (
-            <div
-              key={t.id}
-              className="pearl-ring relative flex flex-col items-center gap-2 rounded-2xl bg-white p-7 text-center shadow-[0_16px_32px_-12px_rgba(88,28,80,0.4),0_4px_10px_-4px_rgba(88,28,80,0.25),inset_0_1px_0_rgba(255,255,255,0.8)] ring-1 ring-blush-200 transition duration-300 hover:-translate-y-2 hover:shadow-[0_24px_40px_-12px_rgba(88,28,80,0.5),0_8px_16px_-4px_rgba(88,28,80,0.32)] hover:ring-blush-400"
-            >
-              <span className="pearl-ring relative inline-block rounded-full">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={t.avatar}
-                  alt={t.name}
-                  className="h-16 w-16 rounded-full object-cover shadow-[0_8px_16px_-4px_rgba(0,0,0,0.35),inset_0_1px_2px_rgba(255,255,255,0.4)] ring-2 ring-blush-300"
-                />
-              </span>
-              <div className="flex items-center gap-1 text-sm text-amber-500">
-                {"★".repeat(t.rating)}
-              </div>
-              <p className="text-sm text-plum-900/70">{t.comment}</p>
-              <span className="font-extrabold text-plum-900">{t.name}</span>
-            </div>
-          ))}
-        </div>
-      </section>
+      <TestimonialsSection
+        items={dbTestimonials.map((t) => ({
+          id: t.id,
+          name: t.name,
+          rating: t.rating,
+          comment: t.comment,
+        }))}
+      />
 
       {/* Newsletter */}
       <section className="relative z-10 mx-auto max-w-7xl px-4 pb-16">

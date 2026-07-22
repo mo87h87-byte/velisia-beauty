@@ -94,6 +94,16 @@ export const settings = pgTable("settings", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
+export const testimonials = pgTable("testimonials", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  rating: integer("rating").notNull(),
+  comment: text("comment").notNull(),
+  isVisible: boolean("is_visible").notNull().default(false),
+  isPinned: boolean("is_pinned").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
 export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
 export type Review = typeof reviews.$inferSelect;
@@ -101,3 +111,4 @@ export type Order = typeof orders.$inferSelect;
 export type Message = typeof messages.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Setting = typeof settings.$inferSelect;
+export type Testimonial = typeof testimonials.$inferSelect;

@@ -11,15 +11,17 @@ import AdminDashboardClient from "@/components/AdminDashboardClient";
 import AdminProducts from "@/components/AdminProducts";
 import AdminOrders from "@/components/AdminOrders";
 import AdminMessages from "@/components/AdminMessages";
+import AdminTestimonials from "@/components/AdminTestimonials";
 
 
-type Tab = "dashboard" | "products" | "orders" | "messages";
+type Tab = "dashboard" | "products" | "orders" | "messages" | "testimonials";
 
 const nav: { key: Tab; label: string; icon: string }[] = [
   { key: "dashboard", label: "لوحة التحكم", icon: "📊" },
   { key: "products", label: "المنتجات", icon: "🧴" },
   { key: "orders", label: "الطلبات", icon: "📦" },
   { key: "messages", label: "الرسائل", icon: "💌" },
+  { key: "testimonials", label: "آراء العملاء", icon: "💬" },
 ];
 
 export default function AdminApp() {
@@ -124,6 +126,7 @@ export default function AdminApp() {
           {tab === "products" && <AdminProducts />}
           {tab === "orders" && <AdminOrders />}
           {tab === "messages" && <AdminMessages />}
+          {tab === "testimonials" && <AdminTestimonials />}
         </main>
       </div>
     </div>
