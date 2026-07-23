@@ -8,6 +8,7 @@ import { AccountProvider } from "@/lib/account-context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import CartDrawer from "@/components/CartDrawer";
+import ChatWidget from "@/components/ChatWidget";
 
 const tajawal = Tajawal({
   subsets: ["arabic", "latin"],
@@ -44,6 +45,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <main className="min-h-screen">{children}</main>
             <Footer />
             <CartDrawer />
+            <ChatWidget />
           </CartProvider>
         </AccountProvider>
         <Script src="https://cdn.moyasar.com/mpf/1.7.3/moyasar.js" strategy="beforeInteractive" />
