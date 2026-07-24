@@ -10,6 +10,7 @@ export interface DashboardStats {
   lowStock: { id: number; name: string; stock: number }[];
   topCategories: { category: string; count: number }[];
   recentOrders: Order[];
+  stalePendingOrders: Order[];
 }
 
 export interface AdminData {

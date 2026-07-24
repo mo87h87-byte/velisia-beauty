@@ -6,6 +6,7 @@ import { adminFetch, clearAdminToken } from "@/lib/admin-client";
 import { formatPrice, formatArabicDate } from "@/lib/format";
 import { categoryLabel } from "@/lib/constants";
 import { ORDER_STATUS_LABELS } from "@/lib/order-status";
+import type { Order } from "@/db/schema";
 
 export default function AdminDashboardClient({
   onNavigate,
@@ -51,6 +52,12 @@ export default function AdminDashboardClient({
     { label: "طلبات جديدة", value: String(stats.newOrders), icon: "🔔", tint: "from-purple-400 to-purple-600" },
   ];
 
+  const daysAgo = (createdAt: Order["createdAt"]) => {
+    const diffMs = Date.now() - new Date(createdAt).getTime();
+    const days = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+    return days <= 1 ? "منذ يوم" : `منذ ${days} أيام`;
+  };
+
   return (
     <>
       <div className="mb-6">
@@ -69,6 +76,34 @@ export default function AdminDashboardClient({
           </div>
         ))}
       </div>
+
+      {stats.stalePendingOrders.length > 0 && (
+        <div className="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5 shadow-sm">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-bold text-amber-800">
+              ⏰ طلبات بانتظار الدفع منذ فترة طويلة ({stats.stalePendingOrders.length})
+            </h2>
+            <button
+              onClick={() => onNavigate?.("orders")}
+              className="text-sm font-bold text-amber-700 hover:underline"
+            >
+              مراجعة الطلبات ←
+            </button>
+          </div>
+          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            {stats.stalePendingOrders.slice(0, 6).map((o) => (
+              <div key={o.id} className="rounded-xl bg-white p-3 text-sm">
+                <p className="font-bold text-blush-600">{o.orderNumber}</p>
+                <p className="text-xs text-plum-900/60">{o.customerName}</p>
+                <div className="mt-1 flex items-center justify-between">
+                  <span className="text-xs font-semibold text-amber-700">{daysAgo(o.createdAt)}</span>
+                  <span className="text-xs font-bold text-plum-900">{formatPrice(o.total)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
