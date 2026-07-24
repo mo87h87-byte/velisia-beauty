@@ -23,6 +23,20 @@ export async function PATCH(
     if (Object.keys(patch).length === 0) {
       return Response.json({ error: "لا يوجد تحديث صالح" }, { status: 400 });
     }
+
+    // Auto-advance a fresh order to "processing" the moment its payment is
+    // confirmed as paid — unless the caller already set a status explicitly
+    // in this same request (their choice wins).
+    if (patch.paymentStatus === "paid" && !patch.status) {
+      const [current] = await db
+        .select()
+        .from(orders)
+        .where(eq(orders.id, Number(id)));
+      if (current && current.status === "new") {
+        patch.status = "processing";
+      }
+    }
+
     const [updated] = await db
       .update(orders)
       .set(patch)

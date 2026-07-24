@@ -54,6 +54,12 @@ export async function POST(request: Request) {
     const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
     const orderNumber = `VLS-${Date.now().toString().slice(-6)}${randomPart}`;
 
+    const finalPaymentStatus = paymentStatus === "paid" ? "paid" : "pending";
+    // If the order arrives already paid (verified card payment), skip the
+    // "new" stage entirely and start it straight in "processing" — no
+    // manual admin step needed to notice it's ready to be prepared.
+    const initialStatus = finalPaymentStatus === "paid" ? "processing" : "new";
+
     const [order] = await db
       .insert(orders)
       .values({
@@ -65,7 +71,8 @@ export async function POST(request: Request) {
         address: address.trim(),
         notes: notes?.trim() || null,
         paymentMethod: paymentMethod || "cod",
-        paymentStatus: paymentStatus === "paid" ? "paid" : "pending",
+        paymentStatus: finalPaymentStatus,
+        status: initialStatus,
         items: cleanItems,
         subtotal: subtotal.toFixed(2),
         shipping: shipping.toFixed(2),
