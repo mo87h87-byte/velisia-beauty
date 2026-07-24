@@ -28,7 +28,7 @@ export async function getDashboardStats(): Promise<DashboardStats> {
   const newOrders = allOrders.filter((o) => o.status === "new").length;
 
   const lowStock = allProducts
-    .filter((p) => p.stock <= 25)
+    .filter((p) => p.stock <= 10)
     .sort((a, b) => a.stock - b.stock)
     .slice(0, 5)
     .map((p) => ({ id: p.id, name: p.name, stock: p.stock }));
