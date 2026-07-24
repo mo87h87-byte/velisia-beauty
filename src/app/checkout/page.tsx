@@ -215,7 +215,11 @@ function CheckoutPageInner() {
         body: JSON.stringify({
           ...form,
           paymentMethod: payment,
-          paymentStatus: payment === "cod" ? "pending" : "paid",
+          // Apple Pay / STC Pay are not yet connected to a real payment
+          // gateway — orders always start as "pending" until a real
+          // confirmation flow is wired up. Only the card flow (verified
+          // against Moyasar above) is marked "paid" automatically.
+          paymentStatus: "pending",
           items,
         }),
       });
