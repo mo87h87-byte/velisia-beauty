@@ -28,6 +28,8 @@ export default function AdminOrders() {
   const [loaded, setLoaded] = useState(false);
   const [expanded, setExpanded] = useState<number | null>(null);
   const [filter, setFilter] = useState("all");
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [deleting, setDeleting] = useState<number | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -59,6 +61,22 @@ export default function AdminOrders() {
     if (res.ok) {
       const data = await res.json();
       setOrders((prev) => prev.map((o) => (o.id === id ? data.order : o)));
+    }
+  };
+
+  const remove = async (id: number) => {
+    setDeleting(id);
+    try {
+      const res = await adminFetch(`/api/admin/orders/${id}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        setOrders((prev) => prev.filter((o) => o.id !== id));
+        setExpanded((prev) => (prev === id ? null : prev));
+      }
+    } finally {
+      setDeleting(null);
+      setConfirmDelete(null);
     }
   };
 
@@ -111,17 +129,17 @@ export default function AdminOrders() {
             const isOpen = expanded === o.id;
             return (
               <div key={o.id} className="overflow-hidden rounded-2xl border border-blush-100 bg-white shadow-sm">
-                <button
-                  onClick={() => setExpanded(isOpen ? null : o.id)}
-                  className="flex w-full flex-wrap items-center justify-between gap-3 p-4 text-right"
-                >
-                  <div className="flex items-center gap-3">
+                <div className="flex w-full flex-wrap items-center justify-between gap-3 p-4">
+                  <button
+                    onClick={() => setExpanded(isOpen ? null : o.id)}
+                    className="flex flex-1 items-center gap-3 text-right"
+                  >
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-blush-50 text-lg">🧾</span>
                     <div>
                       <p className="font-bold text-blush-600">{o.orderNumber}</p>
                       <p className="text-xs text-plum-900/60">{o.customerName} • {formatArabicDate(o.createdAt)}</p>
                     </div>
-                  </div>
+                  </button>
                   <div className="flex flex-wrap items-center gap-2">
                     <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${PAYMENT_STATUS_COLORS[o.paymentStatus]}`}>
                       {PAYMENT_STATUS_LABELS[o.paymentStatus]}
@@ -130,11 +148,43 @@ export default function AdminOrders() {
                       {ORDER_STATUS_LABELS[o.status]}
                     </span>
                     <span className="font-extrabold text-plum-900">{formatPrice(o.total)}</span>
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-plum-900/40 transition ${isOpen ? "rotate-180" : ""}`}>
-                      <path d="M6 9l6 6 6-6" />
-                    </svg>
+                    <button
+                      onClick={() => setConfirmDelete(o.id)}
+                      title="حذف الطلب"
+                      className="grid h-8 w-8 place-items-center rounded-lg text-red-400 transition hover:bg-red-50 hover:text-red-600"
+                    >
+                      🗑️
+                    </button>
+                    <button onClick={() => setExpanded(isOpen ? null : o.id)}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-plum-900/40 transition ${isOpen ? "rotate-180" : ""}`}>
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </button>
                   </div>
-                </button>
+                </div>
+
+                {confirmDelete === o.id && (
+                  <div className="flex items-center justify-between gap-3 border-t border-red-100 bg-red-50 px-4 py-3">
+                    <p className="text-sm font-semibold text-red-700">
+                      متأكدة من حذف الطلب {o.orderNumber}؟ لا يمكن التراجع عن هذا الإجراء.
+                    </p>
+                    <div className="flex shrink-0 gap-2">
+                      <button
+                        onClick={() => remove(o.id)}
+                        disabled={deleting === o.id}
+                        className="rounded-full bg-red-500 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-red-600 disabled:opacity-60"
+                      >
+                        {deleting === o.id ? "جاري الحذف..." : "تأكيد الحذف"}
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(null)}
+                        className="rounded-full border border-red-200 px-4 py-1.5 text-xs font-bold text-red-600 transition hover:bg-red-100"
+                      >
+                        إلغاء
+                      </button>
+                    </div>
+                  </div>
+                )}
 
                 {isOpen && (
                   <div className="border-t border-blush-50 bg-blush-50/40 p-4">

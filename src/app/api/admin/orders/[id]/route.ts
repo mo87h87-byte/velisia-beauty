@@ -34,3 +34,23 @@ export async function PATCH(
     return Response.json({ error: "خطأ في الخادم" }, { status: 500 });
   }
 }
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  if (!(await isAuthorized(request))) {
+    return Response.json({ error: "غير مصرّح" }, { status: 401 });
+  }
+  try {
+    const { id } = await params;
+    const [deleted] = await db
+      .delete(orders)
+      .where(eq(orders.id, Number(id)))
+      .returning();
+    if (!deleted) return Response.json({ error: "الطلب غير موجود" }, { status: 404 });
+    return Response.json({ success: true });
+  } catch {
+    return Response.json({ error: "خطأ في الخادم" }, { status: 500 });
+  }
+}
