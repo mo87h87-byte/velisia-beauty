@@ -13,14 +13,23 @@ import AdminOrders from "@/components/AdminOrders";
 import AdminMessages from "@/components/AdminMessages";
 import AdminTestimonials from "@/components/AdminTestimonials";
 import AdminSupportEmails from "@/components/AdminSupportEmails";
+import AdminRestock from "@/components/AdminRestock";
 
 
-type Tab = "dashboard" | "products" | "orders" | "messages" | "testimonials" | "support-emails";
+type Tab =
+  | "dashboard"
+  | "products"
+  | "orders"
+  | "restock"
+  | "messages"
+  | "testimonials"
+  | "support-emails";
 
 const nav: { key: Tab; label: string; icon: string }[] = [
   { key: "dashboard", label: "لوحة التحكم", icon: "📊" },
   { key: "products", label: "المنتجات", icon: "🧴" },
   { key: "orders", label: "الطلبات", icon: "📦" },
+  { key: "restock", label: "إعادة التخزين", icon: "📥" },
   { key: "messages", label: "الرسائل", icon: "💌" },
   { key: "testimonials", label: "آراء العملاء", icon: "💬" },
   { key: "support-emails", label: "الإيميلات", icon: "📧" },
@@ -127,6 +136,7 @@ export default function AdminApp() {
           {tab === "dashboard" && <AdminDashboardClient onNavigate={setTab} />}
           {tab === "products" && <AdminProducts />}
           {tab === "orders" && <AdminOrders />}
+          {tab === "restock" && <AdminRestock />}
           {tab === "messages" && <AdminMessages />}
           {tab === "testimonials" && <AdminTestimonials />}
           {tab === "support-emails" && <AdminSupportEmails />}
