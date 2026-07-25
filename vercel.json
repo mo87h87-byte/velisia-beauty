@@ -3,6 +3,10 @@
     {
       "path": "/api/email-automation",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/weekly-report",
+      "schedule": "0 7 * * *"
     }
   ]
 }
