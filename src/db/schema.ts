@@ -7,6 +7,7 @@ import {
   boolean,
   timestamp,
   jsonb,
+  bigint,
 } from "drizzle-orm/pg-core";
 
 export const products = pgTable("products", {
@@ -58,6 +59,10 @@ export const orders = pgTable("orders", {
   subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
   shipping: numeric("shipping", { precision: 10, scale: 2 }).notNull(),
   total: numeric("total", { precision: 10, scale: 2 }).notNull(),
+  trackingNumber: text("tracking_number"),
+  carrier: text("carrier"),
+  shippedAt: timestamp("shipped_at"),
+  deliveredAt: timestamp("delivered_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -104,6 +109,48 @@ export const testimonials = pgTable("testimonials", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const paymentMethods = pgTable("payment_methods", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  name: text("name").notNull(),
+  description: text("description"),
+  isActive: boolean("is_active").default(true),
+  sortOrder: integer("sort_order").default(0),
+  config: jsonb("config").default({}),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const emailAutomationTokens = pgTable("email_automation_tokens", {
+  id: serial("id").primaryKey(),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  expiryDate: bigint("expiry_date", { mode: "number" }).notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const supportEmails = pgTable("support_emails", {
+  id: serial("id").primaryKey(),
+  gmailMessageId: text("gmail_message_id").notNull().unique(),
+  fromEmail: text("from_email").notNull(),
+  fromName: text("from_name"),
+  subject: text("subject"),
+  body: text("body").notNull(),
+  reason: text("reason").notNull(),
+  status: text("status").notNull().default("pending"),
+  receivedAt: timestamp("received_at").defaultNow(),
+  resolvedAt: timestamp("resolved_at"),
+});
+
+export const autoRepliedEmails = pgTable("auto_replied_emails", {
+  id: serial("id").primaryKey(),
+  gmailMessageId: text("gmail_message_id").notNull().unique(),
+  fromEmail: text("from_email").notNull(),
+  subject: text("subject"),
+  category: text("category").notNull(),
+  repliedAt: timestamp("replied_at").defaultNow(),
+});
+
 export type Product = typeof products.$inferSelect;
 export type NewProduct = typeof products.$inferInsert;
 export type Review = typeof reviews.$inferSelect;
@@ -112,3 +159,7 @@ export type Message = typeof messages.$inferSelect;
 export type Customer = typeof customers.$inferSelect;
 export type Setting = typeof settings.$inferSelect;
 export type Testimonial = typeof testimonials.$inferSelect;
+export type PaymentMethod = typeof paymentMethods.$inferSelect;
+export type EmailAutomationToken = typeof emailAutomationTokens.$inferSelect;
+export type SupportEmail = typeof supportEmails.$inferSelect;
+export type AutoRepliedEmail = typeof autoRepliedEmails.$inferSelect;
