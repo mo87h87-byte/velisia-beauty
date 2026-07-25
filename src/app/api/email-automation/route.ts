@@ -3,6 +3,7 @@ import { getGmailClient } from "@/lib/gmail";
 import { db } from "@/db";
 import { sql } from "drizzle-orm";
 import { STORE_KNOWLEDGE } from "@/lib/email-knowledge";
+import { isCronAuthorized } from "@/lib/auth";
 
 async function analyzeEmail(subject: string, body: string) {
   const prompt = `أنت مساعد لخدمة عملاء متجر Velisia Beauty. حلل الإيميل التالي وقرر كيفية التعامل معه.
@@ -63,7 +64,10 @@ ${STORE_KNOWLEDGE}
   }
 }
 
-export async function GET() {
+export async function GET(request: Request) {
+  if (!isCronAuthorized(request)) {
+    return NextResponse.json({ error: "غير مصرّح" }, { status: 401 });
+  }
   try {
     const gmail = await getGmailClient();
 

@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { orders, products } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { toNumber } from "@/lib/format";
+import { isCronAuthorized } from "@/lib/auth";
 
 // ---------------------------------------------------------------------------
 // إعدادات عامة
@@ -324,6 +325,9 @@ function buildHtml(r: Awaited<ReturnType<typeof buildReport>>): string {
 // ---------------------------------------------------------------------------
 
 export async function GET(request: Request) {
+  if (!isCronAuthorized(request)) {
+    return NextResponse.json({ error: "غير مصرّح" }, { status: 401 });
+  }
   try {
     const url = new URL(request.url);
     const force = url.searchParams.get("force") === "1";

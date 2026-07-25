@@ -110,13 +110,8 @@ export default function Header() {
       <div className="hidden items-center justify-between bg-plum-900 px-4 py-1.5 text-[11px] text-white/80 md:flex">
         <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
           <div className="flex items-center gap-4">
-            <Link href="/contact" className="hover:text-white">خدمة العملاء</Link>
-            <Link href="/account/orders" className="hover:text-white">تتبع الطلب</Link>
-          </div>
-          <div className="flex items-center gap-1">
-            <button className="hover:text-white">العربية</button>
-            <span>|</span>
-            <button className="hover:text-white">English</button>
+            <Link href="/pages/contact" className="hover:text-white">خدمة العملاء</Link>
+            <Link href="/pages/track-order" className="hover:text-white">تتبع الطلب</Link>
           </div>
         </div>
       </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { adminFetch } from "@/lib/admin-client";
 
 type SupportEmail = {
   id: number;
@@ -21,7 +22,7 @@ export default function AdminSupportEmails() {
   const load = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/admin/support-emails");
+      const res = await adminFetch("/api/admin/support-emails");
       const data = await res.json();
       setEmails(data.emails || []);
     } catch {
@@ -38,9 +39,8 @@ export default function AdminSupportEmails() {
   const markResolved = async (id: number) => {
     setResolvingId(id);
     try {
-      await fetch("/api/admin/support-emails", {
+      await adminFetch("/api/admin/support-emails", {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
       setEmails((prev) => prev.filter((e) => e.id !== id));

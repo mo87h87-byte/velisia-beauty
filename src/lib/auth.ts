@@ -1,10 +1,19 @@
 import { cookies } from "next/headers";
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 
 const COOKIE_NAME = "velisia_admin";
-const SECRET = process.env.ADMIN_SECRET || "velisia-super-secret-key-2026";
 
-export const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "velisia2026";
+function requireEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`${name} environment variable is not set`);
+  }
+  return value;
+}
+
+const SECRET = requireEnv("ADMIN_SECRET");
+
+export const ADMIN_PASSWORD = requireEnv("ADMIN_PASSWORD");
 
 function sign(value: string): string {
   return createHmac("sha256", SECRET).update(value).digest("hex");
@@ -39,6 +48,22 @@ export async function isAuthorized(request: Request): Promise<boolean> {
     if (verifyToken(header.slice(7))) return true;
   }
   return isAdminAuthenticated();
+}
+
+/**
+ * Authorize a cron-triggered request via `Authorization: Bearer <CRON_SECRET>`
+ * (the header Vercel Cron sends automatically when CRON_SECRET is set).
+ * Fails closed: if CRON_SECRET isn't configured, no request is authorized.
+ */
+export function isCronAuthorized(request: Request): boolean {
+  const secret = process.env.CRON_SECRET;
+  if (!secret) return false;
+  const header = request.headers.get("authorization") || "";
+  const provided = header.startsWith("Bearer ") ? header.slice(7) : "";
+  const a = Buffer.from(provided);
+  const b = Buffer.from(secret);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
 }
 
 export { COOKIE_NAME };

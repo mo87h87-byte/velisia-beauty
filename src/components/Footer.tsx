@@ -10,11 +10,14 @@ export default function Footer() {
   const [email, setEmail] = useState("");
   const [done, setDone] = useState(false);
   const pathname = usePathname();
-const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(localStorage.getItem("velisia_admin_key") === "true");
+  }, []);
+
   if (pathname?.startsWith("/admin")) return null;
-useEffect(() => {
-  setIsAdmin(localStorage.getItem("velisia_admin_key") === "true");
-}, []);
+
   return (
     <footer className="mt-16 bg-gradient-to-b from-plum-800 to-plum-900 text-blush-100">
       {/* Newsletter */}

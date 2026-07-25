@@ -1,9 +1,13 @@
 import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { sql } from "drizzle-orm";
+import { isAuthorized } from "@/lib/auth";
 
 // جلب كل الإيميلات المعلّقة (اللي محتاجة رد يدوي)
-export async function GET() {
+export async function GET(request: Request) {
+  if (!(await isAuthorized(request))) {
+    return NextResponse.json({ error: "غير مصرّح" }, { status: 401 });
+  }
   try {
     const result = await db.execute(sql`
       SELECT id, gmail_message_id, from_email, from_name, subject, body, reason, status, received_at
@@ -24,6 +28,9 @@ export async function GET() {
 
 // تعليم إيميل معين كـ "تم الرد عليه"
 export async function PATCH(request: Request) {
+  if (!(await isAuthorized(request))) {
+    return NextResponse.json({ error: "غير مصرّح" }, { status: 401 });
+  }
   try {
     const { id } = await request.json();
 

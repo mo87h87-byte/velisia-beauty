@@ -41,10 +41,21 @@ export async function getRecommended(): Promise<Product[]> {
 export async function getProductBySlug(
   slug: string,
 ): Promise<{ product: Product; reviews: Review[] } | null> {
+  // In production, dynamic route params for non-ASCII slugs (e.g. Arabic)
+  // arrive still percent-encoded instead of decoded, so the raw value never
+  // matches the DB's stored slug. Decode defensively; a plain slug with no
+  // "%" sequences passes through unchanged.
+  let decodedSlug = slug;
+  try {
+    decodedSlug = decodeURIComponent(slug);
+  } catch {
+    /* malformed sequence, fall back to the raw value */
+  }
+
   const [product] = await db
     .select()
     .from(products)
-    .where(eq(products.slug, slug))
+    .where(eq(products.slug, decodedSlug))
     .limit(1);
   if (!product) return null;
   const productReviews = await db

@@ -1,10 +1,28 @@
 import { cookies } from "next/headers";
 import { ADMIN_PASSWORD, COOKIE_NAME, createToken } from "@/lib/auth";
+import { isRateLimited, recordLoginAttempt } from "@/lib/customer-auth";
+
+function clientKey(request: Request): string {
+  const ip =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip") ||
+    "unknown";
+  return `admin-login:${ip}`;
+}
 
 export async function POST(request: Request) {
   try {
+    const key = clientKey(request);
+    if (await isRateLimited(key)) {
+      return Response.json(
+        { error: "محاولات كثيرة جدًا، يرجى المحاولة بعد 15 دقيقة" },
+        { status: 429 },
+      );
+    }
+
     const { password } = await request.json();
     if (typeof password !== "string" || password.trim() !== ADMIN_PASSWORD) {
+      await recordLoginAttempt(key, false);
       return Response.json({ error: "كلمة المرور غير صحيحة" }, { status: 401 });
     }
 
