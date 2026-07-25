@@ -6,6 +6,8 @@ import { getProductBySlug, getRelatedProducts } from "@/lib/products";
 
 export const dynamic = "force-dynamic";
 
+const SITE_URL = "https://www.velisiabeauty.com";
+
 export async function generateMetadata({
   params,
 }: {
@@ -14,9 +16,28 @@ export async function generateMetadata({
   const { slug } = await params;
   const data = await getProductBySlug(slug);
   if (!data) return { title: "المنتج غير موجود | velisiabeauty" };
+
+  const title = `${data.product.name} | velisiabeauty`;
+  const description = data.product.shortDescription;
+  const url = `${SITE_URL}/products/${encodeURIComponent(data.product.slug)}`;
+  const image = data.product.images?.[0];
+
   return {
-    title: `${data.product.name} | velisiabeauty`,
-    description: data.product.shortDescription,
+    title,
+    description,
+    openGraph: {
+      type: "website",
+      url,
+      title,
+      description,
+      images: image ? [{ url: image }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: image ? [image] : undefined,
+    },
   };
 }
 
@@ -31,8 +52,42 @@ export default async function ProductPage({
 
   const related = await getRelatedProducts(data.product.category, data.product.id);
 
+  const { product } = data;
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.images,
+    description: product.shortDescription,
+    sku: String(product.id),
+    brand: { "@type": "Brand", name: product.brand },
+    offers: {
+      "@type": "Offer",
+      url: `${SITE_URL}/products/${encodeURIComponent(product.slug)}`,
+      priceCurrency: "SAR",
+      price: product.price,
+      availability:
+        product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+    },
+    ...(Number(product.reviewCount) > 0
+      ? {
+          aggregateRating: {
+            "@type": "AggregateRating",
+            ratingValue: product.rating,
+            reviewCount: product.reviewCount,
+          },
+        }
+      : {}),
+  };
+
   return (
     <div>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <ProductDetail product={data.product} reviews={data.reviews} />
 
       {related.length > 0 && (
