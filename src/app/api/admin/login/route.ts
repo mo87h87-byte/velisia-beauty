@@ -6,6 +6,7 @@ import {
   CSRF_COOKIE_NAME,
   createToken,
   createCsrfToken,
+  timingSafeStringEqual,
 } from "@/lib/auth";
 import { isRateLimited, recordLoginAttempt } from "@/lib/customer-auth";
 
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     const { password } = await request.json();
-    if (typeof password !== "string" || password.trim() !== ADMIN_PASSWORD) {
+    if (typeof password !== "string" || !timingSafeStringEqual(password.trim(), ADMIN_PASSWORD)) {
       await recordLoginAttempt(key, false);
       return Response.json({ error: "كلمة المرور غير صحيحة" }, { status: 401 });
     }

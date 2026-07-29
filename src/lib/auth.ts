@@ -25,6 +25,18 @@ function sign(value: string): string {
   return createHmac("sha256", SECRET).update(value).digest("hex");
 }
 
+/**
+ * Constant-time string comparison, guarding against timing attacks that
+ * could otherwise leak a secret/password/token byte-by-byte. Unequal
+ * lengths short-circuit — that alone doesn't reveal anything about content.
+ */
+export function timingSafeStringEqual(a: string, b: string): boolean {
+  const bufA = Buffer.from(a);
+  const bufB = Buffer.from(b);
+  if (bufA.length !== bufB.length) return false;
+  return timingSafeEqual(bufA, bufB);
+}
+
 export function createToken(): string {
   const payload = `admin.${Date.now()}`;
   return `${payload}.${sign(payload)}`;
@@ -35,7 +47,7 @@ export function verifyToken(token: string | undefined | null): boolean {
   const parts = token.split(".");
   if (parts.length !== 3) return false;
   const payload = `${parts[0]}.${parts[1]}`;
-  if (sign(payload) !== parts[2]) return false;
+  if (!timingSafeStringEqual(sign(payload), parts[2])) return false;
 
   const issuedAt = Number(parts[1]);
   if (!Number.isFinite(issuedAt)) return false;

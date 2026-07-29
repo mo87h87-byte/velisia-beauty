@@ -2,6 +2,7 @@ import { createHmac, randomBytes, scryptSync, timingSafeEqual } from "crypto";
 import { db } from "@/db";
 import { loginAttempts } from "@/db/schema";
 import { eq, and, gt, sql } from "drizzle-orm";
+import { timingSafeStringEqual } from "@/lib/auth";
 
 // Same lifetime as the admin session cookie's prior default (see
 // ADMIN_TOKEN_MAX_AGE_MS in auth.ts, which is now shorter).
@@ -47,7 +48,7 @@ export function verifyCustomerToken(
   const parts = token.split(".");
   if (parts.length !== 4) return null;
   const payload = `${parts[0]}.${parts[1]}.${parts[2]}`;
-  if (sign(payload) !== parts[3]) return null;
+  if (!timingSafeStringEqual(sign(payload), parts[3])) return null;
   if (parts[0] !== "cust") return null;
 
   const issuedAt = Number(parts[2]);
