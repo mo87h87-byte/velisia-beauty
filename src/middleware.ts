@@ -8,6 +8,64 @@ export const runtime = "nodejs";
 
 const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
+// Per-IP request caps for public POST endpoints that have no login to
+// throttle. In-memory (not DB-backed): resets on cold start and is tracked
+// per serverless instance rather than globally, so it's a best-effort
+// deterrent against casual scripted abuse, not an exact global limit.
+// /api/chat and /api/track get a tighter cap — chat burns a real Anthropic
+// API call per message, and track looks up orders by number with no other
+// auth, so both are worth throttling harder than a plain form POST.
+const RATE_LIMITS: Record<string, { limit: number; windowMs: number }> = {
+  "/api/chat": { limit: 8, windowMs: 60_000 },
+  "/api/track": { limit: 8, windowMs: 60_000 },
+  "/api/orders": { limit: 15, windowMs: 60_000 },
+  "/api/reviews": { limit: 15, windowMs: 60_000 },
+  "/api/testimonials": { limit: 15, windowMs: 60_000 },
+  "/api/contact": { limit: 15, windowMs: 60_000 },
+};
+
+interface Bucket {
+  count: number;
+  resetAt: number;
+}
+
+const buckets = new Map<string, Bucket>();
+let lastSweep = Date.now();
+
+function clientIp(request: NextRequest): string {
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  if (forwardedFor) return forwardedFor.split(",")[0].trim();
+  return request.headers.get("x-real-ip") || "unknown";
+}
+
+function isOverLimit(key: string, limit: number, windowMs: number): boolean {
+  const now = Date.now();
+
+  // Occasional sweep so the map doesn't grow unbounded with one-off IPs.
+  if (now - lastSweep > windowMs * 5) {
+    for (const [k, bucket] of buckets) {
+      if (bucket.resetAt < now) buckets.delete(k);
+    }
+    lastSweep = now;
+  }
+
+  const bucket = buckets.get(key);
+  if (!bucket || bucket.resetAt < now) {
+    buckets.set(key, { count: 1, resetAt: now + windowMs });
+    return false;
+  }
+
+  bucket.count++;
+  return bucket.count > limit;
+}
+
+function tooManyRequests(windowMs: number) {
+  return NextResponse.json(
+    { error: "طلبات كثيرة جدًا، يرجى المحاولة بعد قليل" },
+    { status: 429, headers: { "Retry-After": String(Math.ceil(windowMs / 1000)) } },
+  );
+}
+
 function isSameOrigin(request: NextRequest): boolean {
   const host = request.headers.get("host");
   if (!host) return false;
@@ -51,6 +109,20 @@ function deny() {
 }
 
 export function middleware(request: NextRequest) {
+  const path = request.nextUrl.pathname;
+
+  const rateLimit = RATE_LIMITS[path];
+  if (rateLimit && request.method === "POST") {
+    const key = `${path}:${clientIp(request)}`;
+    if (isOverLimit(key, rateLimit.limit, rateLimit.windowMs)) {
+      return tooManyRequests(rateLimit.windowMs);
+    }
+  }
+
+  if (!path.startsWith("/api/admin")) {
+    return NextResponse.next();
+  }
+
   if (!MUTATING_METHODS.has(request.method)) {
     return NextResponse.next();
   }
@@ -81,5 +153,13 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/api/admin/:path*",
+  matcher: [
+    "/api/admin/:path*",
+    "/api/chat",
+    "/api/track",
+    "/api/orders",
+    "/api/reviews",
+    "/api/testimonials",
+    "/api/contact",
+  ],
 };
