@@ -67,7 +67,7 @@ export default function ProductDetail({
         <div className="lg:sticky lg:top-40 lg:self-start">
           <div className="relative overflow-hidden rounded-3xl border border-blush-100 bg-white">
             {discount && (
-              <span className="absolute right-4 top-4 z-10 rounded-full bg-plum-800 px-3 py-1 text-xs font-bold text-white">
+              <span className="absolute right-4 top-4 z-10 rounded-full bg-gradient-to-l from-wine-500 to-wine-600 px-3 py-1 text-xs font-bold text-white">
                 خصم {discount}%
               </span>
             )}
@@ -126,7 +126,7 @@ export default function ProductDetail({
               </span>
             )}
             {discount && (
-              <span className="mb-1 rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-bold text-green-700">
+              <span className="mb-1 rounded-full bg-success-light px-2.5 py-0.5 text-xs font-bold text-success-dark">
                 وفّري {discount}%
               </span>
             )}
@@ -137,12 +137,12 @@ export default function ProductDetail({
 
           <div className="mt-3 flex items-center gap-2 text-sm">
             {product.stock > 0 ? (
-              <span className="flex items-center gap-1.5 font-semibold text-green-600">
-                <span className="h-2 w-2 rounded-full bg-green-500" />
+              <span className="flex items-center gap-1.5 font-semibold text-success">
+                <span className="h-2 w-2 rounded-full bg-success" />
                 متوفر في المخزون
               </span>
             ) : (
-              <span className="font-semibold text-red-500">غير متوفر حالياً</span>
+              <span className="font-semibold text-error">غير متوفر حالياً</span>
             )}
           </div>
 
@@ -170,7 +170,7 @@ export default function ProductDetail({
                 handleAdd();
                 openCart();
               }}
-              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-blush-500 to-blush-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90 sm:flex-none sm:px-10"
+              className="flex flex-1 items-center justify-center gap-2 rounded-full bg-gradient-to-l from-wine-500 to-wine-600 px-6 py-3.5 text-sm font-bold text-white shadow-lg shadow-wine-300/50 transition hover:opacity-90 sm:flex-none sm:px-10"
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="9" cy="21" r="1" />
@@ -347,7 +347,7 @@ function ReviewsBlock({
               rows={4}
               className="w-full rounded-xl border border-blush-200 px-4 py-2.5 text-sm outline-none focus:border-blush-400"
             />
-            {error && <p className="text-xs text-red-500">{error}</p>}
+            {error && <p className="text-xs text-error">{error}</p>}
             <button
               disabled={loading}
               className="w-full rounded-full bg-gradient-to-l from-blush-500 to-blush-600 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:opacity-60"

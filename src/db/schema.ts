@@ -28,6 +28,7 @@ export const products = pgTable("products", {
   isBestseller: boolean("is_bestseller").notNull().default(false),
   isRecommended: boolean("is_recommended").notNull().default(false),
   isNew: boolean("is_new").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -106,6 +107,7 @@ export const testimonials = pgTable("testimonials", {
   comment: text("comment").notNull(),
   isVisible: boolean("is_visible").notNull().default(false),
   isPinned: boolean("is_pinned").notNull().default(false),
+  sortOrder: integer("sort_order").notNull().default(0),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 

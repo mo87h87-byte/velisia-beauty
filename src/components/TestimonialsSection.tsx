@@ -10,7 +10,13 @@ type TestimonialItem = {
   comment: string;
 };
 
-export default function TestimonialsSection({ items }: { items: TestimonialItem[] }) {
+export default function TestimonialsSection({
+  items,
+  title = "آراء عملائنا",
+}: {
+  items: TestimonialItem[];
+  title?: string;
+}) {
   const [showForm, setShowForm] = useState(false);
 
   return (
@@ -20,7 +26,7 @@ export default function TestimonialsSection({ items }: { items: TestimonialItem[
           onClick={() => setShowForm((v) => !v)}
           className="pearl-ring relative inline-block rounded-2xl bg-gradient-to-br from-[#f3e5c9] via-[#e8c98f] to-[#d9ad6a] px-6 py-2.5 text-lg font-extrabold text-plum-900 shadow-[0_10px_20px_-6px_rgba(88,28,80,0.4),inset_0_2px_0_rgba(255,255,255,0.6),inset_0_-3px_6px_rgba(120,80,20,0.35)] ring-1 ring-[#c9a86a]/40 transition hover:-translate-y-0.5 md:text-xl"
         >
-          آراء عملائنا
+          {title}
         </button>
       </div>
 

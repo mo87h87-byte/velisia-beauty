@@ -33,10 +33,10 @@ export default function ProductCard({
   return (
     <Link
       href={link || `/products/${slug}`}
-      className="relative flex flex-col overflow-hidden rounded-2xl bg-white p-3 shadow-[0_10px_24px_-8px_rgba(88,28,80,0.25)] ring-1 ring-black/5 transition hover:-translate-y-1.5 hover:shadow-[0_18px_32px_-8px_rgba(88,28,80,0.35)]"
+      className="relative flex flex-col overflow-hidden rounded-2xl bg-nude-50 p-3 shadow-[0_10px_24px_-8px_rgba(88,28,80,0.25)] ring-1 ring-black/5 transition hover:-translate-y-1.5 hover:shadow-[0_18px_32px_-8px_rgba(88,28,80,0.35)]"
     >
       {discount && (
-        <span className="absolute right-2 top-2 z-10 rounded-full bg-gradient-to-l from-blush-500 to-blush-600 px-2 py-1 text-xs font-bold text-white shadow-[0_4px_10px_-2px_rgba(236,72,153,0.6)]">
+        <span className="absolute right-2 top-2 z-10 rounded-full bg-gradient-to-l from-wine-500 to-wine-600 px-2 py-1 text-xs font-bold text-white shadow-[0_4px_10px_-2px_rgba(143,29,63,0.6)]">
           خصم {discount}%
         </span>
       )}
@@ -50,7 +50,7 @@ export default function ProductCard({
       <img
         src={image}
         alt={name}
-        className="mb-2 h-32 w-full rounded-xl bg-blush-50 object-cover"
+        className="mb-2 h-32 w-full rounded-xl bg-nude-100 object-cover"
       />
 
       <span className="text-xs font-bold text-plum-900 md:text-sm">

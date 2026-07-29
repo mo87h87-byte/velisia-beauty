@@ -1,13 +1,14 @@
 @import "tailwindcss";
 
+
 @theme {
   --color-blush-50: #fdf5f6;
   --color-blush-100: #fbe9ec;
   --color-blush-200: #f7d4db;
   --color-blush-300: #f0b3c0;
   --color-blush-400: #e58aa0;
-  --color-blush-500: #d6647f;
-  --color-blush-600: #c04968;
+  --color-blush-500: #d1207f;
+  --color-blush-600: #a80f5c;
   --color-blush-700: #a13755;
   --color-blush-800: #862f49;
   --color-blush-900: #722a41;
@@ -21,11 +22,68 @@
   --color-plum-600: #7a3454;
   --color-plum-700: #5e2740;
   --color-plum-800: #4a2233;
-  --color-plum-900: #3a1a28;
+  --color-plum-900: #200a1c;
+
+  --color-accent-50: #f6f4fb;
+  --color-accent-100: #ece7f7;
+  --color-accent-200: #d9cbef;
+  --color-accent-300: #bfa8e3;
+  --color-accent-400: #9f7ed2;
+  --color-accent-500: #7c56bd;
+  --color-accent-600: #63419c;
+  --color-accent-700: #4f3480;
+  --color-accent-800: #402a67;
+  --color-accent-900: #2a1b44;
+
+  --color-nude-50: #fdfbf8;
+  --color-nude-100: #faf5ee;
+  --color-nude-200: #f3e8d9;
+  --color-nude-300: #e8d5bc;
+  --color-nude-400: #d7bd9a;
+  --color-nude-500: #c2a179;
+  --color-nude-600: #a3835d;
+  --color-nude-700: #806549;
+  --color-nude-800: #5f4b38;
+  --color-nude-900: #3c2f24;
+
+  --color-rose-gold-50: #faf5f6;
+  --color-rose-gold-100: #f3e7e9;
+  --color-rose-gold-200: #e6ccd0;
+  --color-rose-gold-300: #d3a6ad;
+  --color-rose-gold-400: #c48791;
+  --color-rose-gold-500: #b76e79;
+  --color-rose-gold-600: #a14f5b;
+  --color-rose-gold-700: #82404a;
+  --color-rose-gold-800: #633138;
+  --color-rose-gold-900: #3e1e23;
+
+  --color-wine-50: #fbeef1;
+  --color-wine-100: #f6d9df;
+  --color-wine-200: #eab0bd;
+  --color-wine-300: #d97e94;
+  --color-wine-400: #c14f6d;
+  --color-wine-500: #8f1d3f;
+  --color-wine-600: #7a1735;
+  --color-wine-700: #63122b;
+  --color-wine-800: #4a0e21;
+  --color-wine-900: #300916;
 
   --color-rose-gold: #b76e79;
   --color-champagne: #f3e4d6;
   --color-gold: #c9a86a;
+
+  --color-success: #16a34a;
+  --color-success-light: #dcfce7;
+  --color-success-dark: #166534;
+  --color-error: #dc2626;
+  --color-error-light: #fee2e2;
+  --color-error-dark: #991b1b;
+  --color-warning: #ca8a04;
+  --color-warning-light: #fef9c3;
+  --color-warning-dark: #854d0e;
+
+  --color-site-bg: #fdf5f6;
+  --color-site-text: #200a1c;
 
   --font-sans: var(--font-tajawal), system-ui, sans-serif;
   --font-display: var(--font-playfair), Georgia, serif;
@@ -80,8 +138,8 @@ html {
 }
 
 body {
-  background-color: var(--color-blush-50);
-  color: var(--color-plum-900);
+  background-color: var(--color-site-bg);
+  color: var(--color-site-text);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -101,14 +159,24 @@ body {
 .brand-logo {
   font-family: var(--font-display);
   letter-spacing: 0.28em;
-  background: linear-gradient(135deg, #b76e79 0%, #d6647f 45%, #c9a86a 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-rose-gold-400) 0%,
+    var(--color-rose-gold-600) 45%,
+    var(--color-gold) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-gold-gradient {
-  background: linear-gradient(135deg, #c9a86a 0%, #b76e79 60%, #d6647f 100%);
+  background: linear-gradient(
+    135deg,
+    var(--color-gold) 0%,
+    var(--color-rose-gold-500) 60%,
+    var(--color-rose-gold-700) 100%
+  );
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;

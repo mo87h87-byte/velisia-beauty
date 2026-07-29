@@ -112,7 +112,7 @@ function AuthForms({
         )}
         <input type="email" value={form.email} onChange={(e) => up("email", e.target.value)} placeholder="البريد الإلكتروني" className={inp} dir="ltr" />
         <input type="password" value={form.password} onChange={(e) => up("password", e.target.value)} placeholder="كلمة المرور" className={inp} dir="ltr" />
-        {error && <p className="text-center text-sm text-red-500">{error}</p>}
+        {error && <p className="text-center text-sm text-error">{error}</p>}
         <button
           disabled={loading}
           className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-blush-500 to-blush-600 py-3 text-sm font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90 disabled:opacity-60"
@@ -324,7 +324,7 @@ function ProfileForm({
         <label className="mb-1 block text-xs font-semibold text-plum-900">المدينة</label>
         <input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} className={inp} />
       </div>
-      {done && <p className="text-sm font-semibold text-green-600">✓ تم حفظ بياناتك</p>}
+      {done && <p className="text-sm font-semibold text-success">✓ تم حفظ بياناتك</p>}
       <button
         disabled={saving}
         className="rounded-full bg-gradient-to-l from-blush-500 to-blush-600 px-8 py-3 text-sm font-bold text-white shadow-lg transition hover:opacity-90 disabled:opacity-60"

@@ -37,7 +37,7 @@ export default function ContactForm() {
   if (done) {
     return (
       <div className="grid place-items-center rounded-3xl border border-blush-100 bg-white p-10 text-center shadow-sm">
-        <span className="grid h-20 w-20 place-items-center rounded-full bg-green-100 text-4xl">✅</span>
+        <span className="grid h-20 w-20 place-items-center rounded-full bg-success-light text-4xl">✅</span>
         <h3 className="mt-4 font-display text-xl font-bold text-plum-900">تم إرسال رسالتك!</h3>
         <p className="mt-2 text-sm text-plum-900/60">
           شكراً لتواصلك معنا 💗 سيرد عليكِ فريقنا في أقرب وقت ممكن.
@@ -55,7 +55,7 @@ export default function ContactForm() {
       </div>
       <input value={form.subject} onChange={(e) => update("subject", e.target.value)} placeholder="الموضوع" className={inp} />
       <textarea value={form.message} onChange={(e) => update("message", e.target.value)} placeholder="رسالتك..." rows={5} className={inp} />
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
       <button
         disabled={loading}
         className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-blush-500 to-blush-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90 disabled:opacity-60"

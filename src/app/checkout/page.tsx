@@ -333,7 +333,7 @@ function CheckoutPageInner() {
               <Field label="ملاحظات (اختياري)">
                 <textarea value={form.notes} onChange={(e) => update("notes", e.target.value)} rows={2} className={inputCls} placeholder="أي تعليمات خاصة بالتوصيل" />
               </Field>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && <p className="text-sm text-error">{error}</p>}
               <button className="w-full rounded-full bg-gradient-to-l from-blush-500 to-blush-600 py-3.5 text-sm font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90">
                 متابعة للدفع ←
               </button>
@@ -404,13 +404,13 @@ function CheckoutPageInner() {
                 </p>
               </div>
 
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && <p className="text-sm text-error">{error}</p>}
 
               {payment !== "card" && (
                 <button
                   onClick={placeOrder}
                   disabled={loading}
-                  className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-blush-500 to-blush-600 py-4 text-base font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90 disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-wine-500 to-wine-600 py-4 text-base font-bold text-white shadow-lg shadow-wine-300/50 transition hover:opacity-90 disabled:opacity-60"
                 >
                   {loading && (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />

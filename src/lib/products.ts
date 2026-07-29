@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { products, reviews, type Product, type Review } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 
 export async function getAllProducts(): Promise<Product[]> {
   return db.select().from(products).orderBy(desc(products.createdAt));
@@ -19,7 +19,7 @@ export async function getBestsellers(): Promise<Product[]> {
     .select()
     .from(products)
     .where(eq(products.isBestseller, true))
-    .orderBy(desc(products.rating));
+    .orderBy(asc(products.sortOrder), desc(products.rating));
 }
 
 export async function getNewArrivals(): Promise<Product[]> {

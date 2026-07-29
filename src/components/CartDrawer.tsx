@@ -97,7 +97,7 @@ export default function CartDrawer() {
                   للحصول على شحن مجاني 🚚
                 </p>
               ) : (
-                <p className="text-xs font-bold text-green-600">
+                <p className="text-xs font-bold text-success">
                   🎉 مبروك! حصلتِ على شحن مجاني
                 </p>
               )}
@@ -119,7 +119,7 @@ export default function CartDrawer() {
                   <Link
                     href={`/products/${item.slug}`}
                     onClick={closeCart}
-                    className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-blush-50"
+                    className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-nude-100"
                   >
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={item.image} alt={item.name} className="h-full w-full object-cover" />
@@ -190,7 +190,7 @@ export default function CartDrawer() {
               <Link
                 href="/checkout"
                 onClick={closeCart}
-                className="block rounded-full bg-gradient-to-l from-blush-500 to-blush-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90"
+                className="block rounded-full bg-gradient-to-l from-wine-500 to-wine-600 py-3.5 text-center text-sm font-bold text-white shadow-lg shadow-wine-300/50 transition hover:opacity-90"
               >
                 إتمام الطلب
               </Link>

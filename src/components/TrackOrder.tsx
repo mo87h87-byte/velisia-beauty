@@ -84,7 +84,7 @@ export default function TrackOrder() {
             تتبّعي الطلب
           </button>
         </div>
-        {error && <p className="mt-3 text-sm text-red-500">{error}</p>}
+        {error && <p className="mt-3 text-sm text-error">{error}</p>}
         <p className="mt-3 text-xs text-plum-900/50">
           💡 تجدين رقم الطلب في رسالة التأكيد أو صفحة نجاح الطلب.
         </p>
@@ -106,7 +106,7 @@ export default function TrackOrder() {
 
             {/* Timeline */}
             {isCancelled ? (
-              <div className="mt-6 rounded-2xl bg-red-50 p-4 text-center text-sm font-bold text-red-600">
+              <div className="mt-6 rounded-2xl bg-error-light p-4 text-center text-sm font-bold text-error-dark">
                 ⛔ تم إلغاء هذا الطلب
               </div>
             ) : (

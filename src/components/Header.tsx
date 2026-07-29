@@ -6,6 +6,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { useAccount } from "@/lib/account-context";
 import { CATEGORIES } from "@/lib/constants";
+import { Flower2, Headset, ShieldCheck } from "lucide-react";
 
 function IconTruck() {
   return (
@@ -23,6 +24,7 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [wishlistCount, setWishlistCount] = useState(0);
+  const [langOpen, setLangOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
@@ -79,15 +81,15 @@ export default function Header() {
           border-radius: inherit;
           padding: 3px;
           background: linear-gradient(100deg,
-            #ffffff 0%, #f6e6ff 12%, #e0c3fc 24%,
-            #ffffff 38%, #ffd9ee 52%, #c9a8ff 66%,
-            #ffffff 80%, #f6e6ff 100%);
+            #ffffff 0%, var(--color-accent-100) 12%, var(--color-accent-200) 24%,
+            #ffffff 38%, var(--color-blush-100) 52%, var(--color-accent-200) 66%,
+            #ffffff 80%, var(--color-accent-100) 100%);
           background-size: 300% 300%;
           -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
           -webkit-mask-composite: xor;
           mask-composite: exclude;
           animation: pearlShimmer 2.2s ease-in-out infinite;
-          filter: drop-shadow(0 0 8px rgba(230,180,255,0.75)) drop-shadow(0 0 16px rgba(200,150,255,0.4));
+          filter: drop-shadow(0 0 8px var(--color-accent-300)) drop-shadow(0 0 16px var(--color-accent-400));
           pointer-events: none;
           z-index: 5;
         }
@@ -99,30 +101,60 @@ export default function Header() {
           font-size: 11px;
           line-height: 1;
           color: #fff;
-          text-shadow: 0 0 6px #fff, 0 0 12px #d9b3ff;
+          text-shadow: 0 0 6px #fff, 0 0 12px var(--color-accent-300);
           animation: pearlTwinkle 2s ease-in-out infinite;
           pointer-events: none;
           z-index: 6;
         }
       `}</style>
 
-      {/* Top utility bar */}
-      <div className="hidden items-center justify-between bg-plum-900 px-4 py-1.5 text-[11px] text-white/80 md:flex">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-          <div className="flex items-center gap-4">
-            <Link href="/pages/contact" className="hover:text-white">خدمة العملاء</Link>
-            <Link href="/pages/track-order" className="hover:text-white">تتبع الطلب</Link>
-          </div>
-        </div>
-      </div>
-      {/* Announcement bar */}
+      {/* Top bar: free shipping message + utility links + language switcher */}
       <div className="bg-gradient-to-l from-plum-900 via-blush-800 to-plum-900 text-white">
-        <div className="mx-auto flex max-w-7xl items-center justify-center gap-6 px-4 py-2 text-[11px] sm:text-xs">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-[11px] sm:text-xs">
           <span className="flex items-center gap-1.5">
-            <IconTruck /> توصيل مجاني للطلبات فوق ٣٠٠ ر.س
+            <IconTruck /> شحن مجاني للطلبات فوق ٣٠٠ ر.س
           </span>
-          <span className="hidden items-center gap-1.5 sm:flex">🛡️ منتجات أصلية ١٠٠٪</span>
-          <span className="hidden items-center gap-1.5 md:flex">🎁 تغليف فاخر لكل طلب</span>
+          <div className="flex items-center gap-4">
+            <Link href="/pages/contact" className="hidden items-center gap-1.5 hover:text-white/70 sm:flex">
+              <Headset size={14} />
+              خدمة العملاء
+            </Link>
+            <Link href="/pages/track-order" className="hidden items-center gap-1.5 hover:text-white/70 sm:flex">
+              <ShieldCheck size={14} />
+              تتبع الطلب
+            </Link>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setLangOpen((v) => !v)}
+                className="flex items-center gap-1 rounded-md px-1.5 py-0.5 hover:text-white/70"
+              >
+                🇸🇦 العربية
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+              {langOpen && (
+                <div className="absolute left-0 top-full z-30 mt-2 w-32 overflow-hidden rounded-lg bg-white text-plum-900 shadow-[0_12px_24px_-6px_rgba(0,0,0,0.35)] ring-1 ring-black/5">
+                  <button
+                    type="button"
+                    onClick={() => setLangOpen(false)}
+                    className="flex w-full items-center justify-between px-3 py-2 text-xs font-bold hover:bg-blush-50"
+                  >
+                    <span>🇸🇦 العربية</span>
+                    <span className="text-blush-600">✓</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setLangOpen(false)}
+                    className="flex w-full items-center gap-2 px-3 py-2 text-xs hover:bg-blush-50"
+                  >
+                    🇺🇸 English
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -143,11 +175,14 @@ export default function Header() {
           {/* Logo */}
           <Link
             href="/"
-            className="pearl-ring flex flex-col items-center rounded-2xl px-4 py-1.5 leading-none"
+            className="pearl-ring flex items-center gap-2 rounded-2xl px-4 py-1.5 leading-none"
           >
-            <span className="brand-logo text-xl font-bold sm:text-2xl">velisiabeauty</span>
-            <span className="mt-0.5 text-[9px] tracking-[0.3em] text-rose-gold">
-              BEAUTY & CARE
+            <Flower2 className="h-8 w-8 text-blush-400 sm:h-9 sm:w-9" strokeWidth={1.5} />
+            <span className="flex flex-col items-center">
+              <span className="brand-logo text-xl font-bold sm:text-2xl">VELISIA</span>
+              <span className="mt-0.5 text-[9px] tracking-[0.3em] text-rose-gold">
+                BEAUTY
+              </span>
             </span>
           </Link>
 
@@ -244,6 +279,14 @@ export default function Header() {
                 </Link>
               </li>
             ))}
+            <li>
+              <Link
+                href="/products"
+                className="block border-b-2 border-transparent px-4 py-3 text-sm font-medium text-plum-900/80 transition hover:border-blush-300 hover:text-blush-600"
+              >
+                العلامات التجارية
+              </Link>
+            </li>
           </ul>
         </nav>
       </div>

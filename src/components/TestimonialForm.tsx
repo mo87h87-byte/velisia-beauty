@@ -36,7 +36,7 @@ export default function TestimonialForm({ onClose }: { onClose?: () => void }) {
   if (done) {
     return (
       <div className="grid place-items-center rounded-3xl border border-blush-100 bg-white p-8 text-center shadow-sm">
-        <span className="grid h-16 w-16 place-items-center rounded-full bg-green-100 text-3xl">✅</span>
+        <span className="grid h-16 w-16 place-items-center rounded-full bg-success-light text-3xl">✅</span>
         <h3 className="mt-3 font-display text-lg font-bold text-plum-900">شكراً لرأيك!</h3>
         <p className="mt-1 text-sm text-plum-900/60">
           سيظهر تقييمك بعد مراجعته من فريقنا 💗
@@ -83,7 +83,7 @@ export default function TestimonialForm({ onClose }: { onClose?: () => void }) {
         className={inp}
       />
 
-      {error && <p className="text-sm text-red-500">{error}</p>}
+      {error && <p className="text-sm text-error">{error}</p>}
 
       <div className="flex gap-3">
         <button

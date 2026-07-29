@@ -14,6 +14,7 @@ import AdminMessages from "@/components/AdminMessages";
 import AdminTestimonials from "@/components/AdminTestimonials";
 import AdminSupportEmails from "@/components/AdminSupportEmails";
 import AdminRestock from "@/components/AdminRestock";
+import AdminSettings from "@/components/AdminSettings";
 
 
 type Tab =
@@ -23,7 +24,8 @@ type Tab =
   | "restock"
   | "messages"
   | "testimonials"
-  | "support-emails";
+  | "support-emails"
+  | "settings";
 
 const nav: { key: Tab; label: string; icon: string }[] = [
   { key: "dashboard", label: "لوحة التحكم", icon: "📊" },
@@ -33,6 +35,7 @@ const nav: { key: Tab; label: string; icon: string }[] = [
   { key: "messages", label: "الرسائل", icon: "💌" },
   { key: "testimonials", label: "آراء العملاء", icon: "💬" },
   { key: "support-emails", label: "الإيميلات", icon: "📧" },
+  { key: "settings", label: "إعدادات الموقع", icon: "⚙️" },
 ];
 
 export default function AdminApp() {
@@ -140,6 +143,7 @@ export default function AdminApp() {
           {tab === "messages" && <AdminMessages />}
           {tab === "testimonials" && <AdminTestimonials />}
           {tab === "support-emails" && <AdminSupportEmails />}
+          {tab === "settings" && <AdminSettings />}
         </main>
       </div>
     </div>
