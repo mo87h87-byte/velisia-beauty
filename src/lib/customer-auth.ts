@@ -3,6 +3,10 @@ import { db } from "@/db";
 import { loginAttempts } from "@/db/schema";
 import { eq, and, gt, sql } from "drizzle-orm";
 
+// Same lifetime as the admin session cookie's prior default (see
+// ADMIN_TOKEN_MAX_AGE_MS in auth.ts, which is now shorter).
+const CUSTOMER_TOKEN_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
 const SECRET: string = (() => {
   const value = process.env.ADMIN_SECRET;
   if (!value) {
@@ -45,6 +49,11 @@ export function verifyCustomerToken(
   const payload = `${parts[0]}.${parts[1]}.${parts[2]}`;
   if (sign(payload) !== parts[3]) return null;
   if (parts[0] !== "cust") return null;
+
+  const issuedAt = Number(parts[2]);
+  if (!Number.isFinite(issuedAt)) return null;
+  if (Date.now() - issuedAt > CUSTOMER_TOKEN_MAX_AGE_MS) return null;
+
   const id = Number(parts[1]);
   return Number.isFinite(id) ? id : null;
 }

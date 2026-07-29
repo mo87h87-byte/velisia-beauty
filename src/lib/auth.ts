@@ -4,6 +4,11 @@ import { createHmac, timingSafeEqual } from "crypto";
 const COOKIE_NAME = "velisia_admin";
 const CSRF_COOKIE_NAME = "velisia_admin_csrf";
 
+// Shorter than the customer session (see CUSTOMER_TOKEN_MAX_AGE_MS in
+// customer-auth.ts) since an admin token grants far more — a leaked one
+// should go stale quickly.
+export const ADMIN_TOKEN_MAX_AGE_MS = 24 * 60 * 60 * 1000;
+
 function requireEnv(name: string): string {
   const value = process.env[name];
   if (!value) {
@@ -30,7 +35,11 @@ export function verifyToken(token: string | undefined | null): boolean {
   const parts = token.split(".");
   if (parts.length !== 3) return false;
   const payload = `${parts[0]}.${parts[1]}`;
-  return sign(payload) === parts[2];
+  if (sign(payload) !== parts[2]) return false;
+
+  const issuedAt = Number(parts[1]);
+  if (!Number.isFinite(issuedAt)) return false;
+  return Date.now() - issuedAt <= ADMIN_TOKEN_MAX_AGE_MS;
 }
 
 export async function isAdminAuthenticated(): Promise<boolean> {
