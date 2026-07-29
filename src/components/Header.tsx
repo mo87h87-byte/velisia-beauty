@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { useAccount } from "@/lib/account-context";
 import { CATEGORIES } from "@/lib/constants";
-import { Flower2, Headset, ShieldCheck } from "lucide-react";
+import { Headset, ShieldCheck } from "lucide-react";
 
 function IconTruck() {
   return (
@@ -177,7 +178,14 @@ export default function Header() {
             href="/"
             className="pearl-ring flex items-center gap-2 rounded-2xl px-4 py-1.5 leading-none"
           >
-            <Flower2 className="h-8 w-8 text-blush-400 sm:h-9 sm:w-9" strokeWidth={1.5} />
+            <Image
+              src="/velisia-rose-icon.png"
+              alt=""
+              width={426}
+              height={432}
+              priority
+              className="h-8 w-8 sm:h-9 sm:w-9"
+            />
             <span className="flex flex-col items-center">
               <span className="brand-logo text-xl font-bold sm:text-2xl">VELISIA</span>
               <span className="mt-0.5 text-[9px] tracking-[0.3em] text-rose-gold">
