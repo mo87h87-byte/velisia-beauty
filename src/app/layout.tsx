@@ -349,6 +349,11 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: SITE_TITLE,
   description: SITE_DESCRIPTION,
+  icons: {
+    icon: "/favicon-velisia.svg",
+    shortcut: "/favicon-velisia.svg",
+    apple: "/favicon-velisia.svg",
+  },
   openGraph: {
     type: "website",
     locale: "ar_SA",
