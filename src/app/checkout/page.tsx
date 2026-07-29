@@ -130,7 +130,7 @@ function CheckoutPageInner() {
           body: JSON.stringify({
             ...draft.form,
             paymentMethod: "card",
-            paymentStatus: "paid",
+            paymentId,
             items: draft.items,
           }),
         });

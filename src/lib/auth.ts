@@ -2,6 +2,7 @@ import { cookies } from "next/headers";
 import { createHmac, timingSafeEqual } from "crypto";
 
 const COOKIE_NAME = "velisia_admin";
+const CSRF_COOKIE_NAME = "velisia_admin_csrf";
 
 function requireEnv(name: string): string {
   const value = process.env[name];
@@ -51,6 +52,26 @@ export async function isAuthorized(request: Request): Promise<boolean> {
 }
 
 /**
+ * Derives a CSRF token deterministically from a valid session token (HMAC),
+ * so it needs no separate server-side storage — the server can always
+ * recompute the expected value from whichever session token a request
+ * presents, and only someone who already holds that session token could
+ * ever have received the matching CSRF value from the login response.
+ */
+export function createCsrfToken(sessionToken: string): string {
+  return sign(`csrf.${sessionToken}`);
+}
+
+export function verifyCsrfToken(sessionToken: string, provided: string | null | undefined): boolean {
+  if (!provided) return false;
+  const expected = createCsrfToken(sessionToken);
+  const a = Buffer.from(provided);
+  const b = Buffer.from(expected);
+  if (a.length !== b.length) return false;
+  return timingSafeEqual(a, b);
+}
+
+/**
  * Authorize a cron-triggered request via `Authorization: Bearer <CRON_SECRET>`
  * (the header Vercel Cron sends automatically when CRON_SECRET is set).
  * Fails closed: if CRON_SECRET isn't configured, no request is authorized.
@@ -66,4 +87,4 @@ export function isCronAuthorized(request: Request): boolean {
   return timingSafeEqual(a, b);
 }
 
-export { COOKIE_NAME };
+export { COOKIE_NAME, CSRF_COOKIE_NAME };

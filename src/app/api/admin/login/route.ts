@@ -1,5 +1,5 @@
 import { cookies } from "next/headers";
-import { ADMIN_PASSWORD, COOKIE_NAME, createToken } from "@/lib/auth";
+import { ADMIN_PASSWORD, COOKIE_NAME, CSRF_COOKIE_NAME, createToken, createCsrfToken } from "@/lib/auth";
 import { isRateLimited, recordLoginAttempt } from "@/lib/customer-auth";
 
 function clientKey(request: Request): string {
@@ -27,16 +27,29 @@ export async function POST(request: Request) {
     }
 
     const token = createToken();
+    const csrfToken = createCsrfToken(token);
 
-    // Best-effort cookie (works in first-party contexts). The token is also
+    // Best-effort cookies (works in first-party contexts). The token is also
     // returned in the body so the client can store it in localStorage and
     // authenticate via the Authorization header — this works reliably even
     // when third-party cookies are blocked (e.g. inside preview iframes).
+    // sameSite "lax" (not "none") since the admin panel is only ever used
+    // as a first-party top-level page — "none" bought cross-site cookie
+    // delivery we don't need and that widened the CSRF surface.
     try {
       const store = await cookies();
       store.set(COOKIE_NAME, token, {
         httpOnly: true,
-        sameSite: "none",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 60 * 60 * 24 * 7,
+        secure: true,
+      });
+      // Not httpOnly — the CSRF cookie is meant to be paired with a
+      // JS-attached header, never relied on by itself.
+      store.set(CSRF_COOKIE_NAME, csrfToken, {
+        httpOnly: false,
+        sameSite: "lax",
         path: "/",
         maxAge: 60 * 60 * 24 * 7,
         secure: true,
@@ -45,7 +58,7 @@ export async function POST(request: Request) {
       /* ignore cookie failures */
     }
 
-    return Response.json({ ok: true, token });
+    return Response.json({ ok: true, token, csrfToken });
   } catch {
     return Response.json({ error: "خطأ في الخادم" }, { status: 500 });
   }
@@ -54,5 +67,6 @@ export async function POST(request: Request) {
 export async function DELETE() {
   const store = await cookies();
   store.delete(COOKIE_NAME);
+  store.delete(CSRF_COOKIE_NAME);
   return Response.json({ ok: true });
 }

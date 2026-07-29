@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 import {
   saveAdminToken,
+  saveAdminCsrfToken,
   getAdminToken,
   clearAdminToken,
 } from "@/lib/admin-client";
@@ -169,6 +170,7 @@ function LoginView({ onLogin }: { onLogin: () => void }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "خطأ");
       if (data.token) saveAdminToken(data.token);
+      if (data.csrfToken) saveAdminCsrfToken(data.csrfToken);
       // No page navigation — stay in the SPA so the in-memory token persists
       // even if the browser blocks storage inside the preview iframe.
       onLogin();
