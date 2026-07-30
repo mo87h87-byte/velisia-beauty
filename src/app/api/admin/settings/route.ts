@@ -4,6 +4,22 @@ import { isAuthorized } from "@/lib/auth";
 import { ADMIN_PASSWORD_HASH_SETTINGS_KEY } from "@/lib/admin-password";
 import { eq } from "drizzle-orm";
 
+// The "theme" setting's string values are interpolated directly into a
+// <style> tag on every page (see buildThemeCss) — if any of them ever
+// contained something like `</style><script>`, that would be stored XSS
+// hitting every visitor. Every string anywhere in the value must look like
+// a plain CSS color; anything else rejects the whole write.
+const SAFE_COLOR_PATTERN = /^(#[0-9a-fA-F]{3,8}|rgba?\([\d.,%\s]+\)|hsla?\([\d.,%\s]+\))$/;
+
+function isSafeThemeValue(value: unknown): boolean {
+  if (typeof value === "string") return SAFE_COLOR_PATTERN.test(value.trim());
+  if (Array.isArray(value)) return value.every(isSafeThemeValue);
+  if (value && typeof value === "object") {
+    return Object.values(value).every(isSafeThemeValue);
+  }
+  return true; // numbers/booleans/null can't carry markup
+}
+
 export async function GET(request: Request) {
   if (!(await isAuthorized(request))) {
     return Response.json({ error: "غير مصرّح" }, { status: 401 });
@@ -29,6 +45,9 @@ export async function POST(request: Request) {
     }
     if (key === ADMIN_PASSWORD_HASH_SETTINGS_KEY) {
       return Response.json({ error: "غير مسموح بتعديل هذا المفتاح من هنا" }, { status: 400 });
+    }
+    if (key === "theme" && !isSafeThemeValue(b.value)) {
+      return Response.json({ error: "قيم الألوان غير صحيحة" }, { status: 400 });
     }
 
     const [existing] = await db
