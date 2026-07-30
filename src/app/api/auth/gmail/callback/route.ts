@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { createOAuthClient, saveTokens } from "@/lib/gmail";
+import { isAuthorized } from "@/lib/auth";
 
 export async function GET(request: Request) {
+  if (!(await isAuthorized(request))) {
+    return NextResponse.json({ error: "غير مصرّح" }, { status: 401 });
+  }
+
   const { searchParams } = new URL(request.url);
   const code = searchParams.get("code");
 
