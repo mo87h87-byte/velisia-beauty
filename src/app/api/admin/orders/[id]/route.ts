@@ -16,10 +16,13 @@ export async function PATCH(
   try {
     const { id } = await params;
     const b = await request.json();
-    const patch: Record<string, string> = {};
+    const patch: Record<string, string | null> = {};
     if (b.status && ORDER_STATUSES.includes(b.status)) patch.status = b.status;
     if (b.paymentStatus && PAYMENT_STATUSES.includes(b.paymentStatus))
       patch.paymentStatus = b.paymentStatus;
+    if (typeof b.trackingNumber === "string")
+      patch.trackingNumber = b.trackingNumber.trim() || null;
+    if (typeof b.carrier === "string") patch.carrier = b.carrier.trim() || null;
     if (Object.keys(patch).length === 0) {
       return Response.json({ error: "لا يوجد تحديث صالح" }, { status: 400 });
     }

@@ -30,6 +30,9 @@ export default function AdminOrders() {
   const [filter, setFilter] = useState("all");
   const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
   const [deleting, setDeleting] = useState<number | null>(null);
+  const [carrierDraft, setCarrierDraft] = useState("");
+  const [trackingDraft, setTrackingDraft] = useState("");
+  const [savingShipping, setSavingShipping] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -53,7 +56,26 @@ export default function AdminOrders() {
   const filtered =
     filter === "all" ? orders : orders.filter((o) => o.status === filter);
 
-  const patch = async (id: number, body: Record<string, string>) => {
+  const toggleExpand = (o: Order) => {
+    if (expanded === o.id) {
+      setExpanded(null);
+      return;
+    }
+    setExpanded(o.id);
+    setCarrierDraft(o.carrier ?? "");
+    setTrackingDraft(o.trackingNumber ?? "");
+  };
+
+  const saveShipping = async (id: number) => {
+    setSavingShipping(true);
+    try {
+      await patch(id, { carrier: carrierDraft, trackingNumber: trackingDraft });
+    } finally {
+      setSavingShipping(false);
+    }
+  };
+
+  const patch = async (id: number, body: Record<string, string | null>) => {
     const res = await adminFetch(`/api/admin/orders/${id}`, {
       method: "PATCH",
       body: JSON.stringify(body),
@@ -131,7 +153,7 @@ export default function AdminOrders() {
               <div key={o.id} className="overflow-hidden rounded-2xl border border-blush-100 bg-white shadow-sm">
                 <div className="flex w-full flex-wrap items-center justify-between gap-3 p-4">
                   <button
-                    onClick={() => setExpanded(isOpen ? null : o.id)}
+                    onClick={() => toggleExpand(o)}
                     className="flex flex-1 items-center gap-3 text-right"
                   >
                     <span className="grid h-10 w-10 place-items-center rounded-xl bg-blush-50 text-lg">🧾</span>
@@ -155,7 +177,7 @@ export default function AdminOrders() {
                     >
                       🗑️
                     </button>
-                    <button onClick={() => setExpanded(isOpen ? null : o.id)}>
+                    <button onClick={() => toggleExpand(o)}>
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className={`text-plum-900/40 transition ${isOpen ? "rotate-180" : ""}`}>
                         <path d="M6 9l6 6 6-6" />
                       </svg>
@@ -204,19 +226,37 @@ export default function AdminOrders() {
                         </div>
 
                         {/* Shipping */}
-                        {(o.trackingNumber || o.carrier) && (
-                          <div className="rounded-xl bg-white p-4 text-sm">
-                            <h3 className="mb-2 font-bold text-plum-900">معلومات الشحن</h3>
-                            {o.carrier && (
-                              <p className="text-plum-900/70">🚚 {o.carrier}</p>
-                            )}
-                            {o.trackingNumber && (
-                              <p className="mt-1 text-plum-900/70" dir="ltr">
-                                🔖 {o.trackingNumber}
-                              </p>
-                            )}
-                          </div>
-                        )}
+                        <div className="rounded-xl bg-white p-4 text-sm">
+                          <h3 className="mb-2 font-bold text-plum-900">معلومات الشحن</h3>
+                          <label className="mb-2 block">
+                            <span className="mb-1 block text-xs font-semibold text-plum-900/60">شركة الشحن</span>
+                            <input
+                              type="text"
+                              value={carrierDraft}
+                              onChange={(e) => setCarrierDraft(e.target.value)}
+                              placeholder="مثال: أرامكس"
+                              className="w-full rounded-lg border border-blush-200 px-3 py-1.5 text-sm outline-none focus:border-blush-400"
+                            />
+                          </label>
+                          <label className="mb-2 block">
+                            <span className="mb-1 block text-xs font-semibold text-plum-900/60">رقم التتبع</span>
+                            <input
+                              type="text"
+                              dir="ltr"
+                              value={trackingDraft}
+                              onChange={(e) => setTrackingDraft(e.target.value)}
+                              placeholder="مثال: TRK123456"
+                              className="w-full rounded-lg border border-blush-200 px-3 py-1.5 text-sm outline-none focus:border-blush-400"
+                            />
+                          </label>
+                          <button
+                            onClick={() => saveShipping(o.id)}
+                            disabled={savingShipping}
+                            className="rounded-full bg-blush-500 px-4 py-1.5 text-xs font-bold text-white transition hover:bg-blush-600 disabled:opacity-60"
+                          >
+                            {savingShipping ? "جاري الحفظ..." : "حفظ"}
+                          </button>
+                        </div>
                       </div>
 
                       {/* Items */}
