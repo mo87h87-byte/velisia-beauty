@@ -6,6 +6,8 @@ import ProductCard from "./ProductCard";
 import { CATEGORIES, SORT_OPTIONS, type SortKey } from "@/lib/constants";
 import { toNumber } from "@/lib/format";
 
+const PAGE_SIZE = 12;
+
 interface Props {
   products: Product[];
   initialCategory?: string;
@@ -35,6 +37,7 @@ export default function ProductsBrowser({
   const [onlyOffers, setOnlyOffers] = useState(initialCategory === "offers");
   const [query] = useState(initialQuery ?? "");
   const [showFilters, setShowFilters] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const brands = useMemo(
     () => Array.from(new Set(products.map((p) => p.brand))).sort(),
@@ -77,6 +80,19 @@ export default function ProductsBrowser({
     });
     return list;
   }, [products, category, priceKey, brand, sort, onlyOffers, query]);
+
+  // Reset back to the first page whenever the filters change, so "load
+  // more" always starts fresh instead of carrying over a stale count.
+  // Adjusted directly during render (React's documented pattern for this)
+  // rather than in an effect, to avoid an extra render pass.
+  const filterKey = `${category}|${priceKey}|${brand}|${sort}|${onlyOffers}|${query}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  const visible = filtered.slice(0, visibleCount);
 
   const activeCatLabel =
     category === "all"
@@ -227,7 +243,7 @@ export default function ProductsBrowser({
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-              {filtered.map((p) => {
+              {visible.map((p) => {
                 const price = toNumber(p.price);
                 const oldPrice = p.oldPrice ? toNumber(p.oldPrice) : undefined;
                 const discount =
@@ -250,6 +266,17 @@ export default function ProductsBrowser({
                   />
                 );
               })}
+            </div>
+          )}
+
+          {visibleCount < filtered.length && (
+            <div className="mt-8 flex justify-center">
+              <button
+                onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                className="rounded-full border border-blush-200 bg-white px-8 py-3 text-sm font-bold text-plum-900 transition hover:border-blush-400 hover:bg-blush-50"
+              >
+                تحميل المزيد ({filtered.length - visibleCount} متبقٍ)
+              </button>
             </div>
           )}
         </div>

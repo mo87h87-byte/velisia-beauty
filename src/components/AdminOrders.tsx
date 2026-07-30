@@ -23,6 +23,8 @@ interface OrderItem {
   image: string;
 }
 
+const PAGE_SIZE = 15;
+
 export default function AdminOrders() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -33,6 +35,7 @@ export default function AdminOrders() {
   const [carrierDraft, setCarrierDraft] = useState("");
   const [trackingDraft, setTrackingDraft] = useState("");
   const [savingShipping, setSavingShipping] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   useEffect(() => {
     (async () => {
@@ -55,6 +58,17 @@ export default function AdminOrders() {
 
   const filtered =
     filter === "all" ? orders : orders.filter((o) => o.status === filter);
+
+  // Reset back to the first page whenever the status filter changes.
+  // Adjusted directly during render rather than in an effect, per React's
+  // documented pattern for resetting state when a dependency changes.
+  const [prevFilter, setPrevFilter] = useState(filter);
+  if (filter !== prevFilter) {
+    setPrevFilter(filter);
+    setVisibleCount(PAGE_SIZE);
+  }
+
+  const visible = filtered.slice(0, visibleCount);
 
   const toggleExpand = (o: Order) => {
     if (expanded === o.id) {
@@ -146,7 +160,7 @@ export default function AdminOrders() {
         </div>
       ) : (
         <div className="space-y-3">
-          {filtered.map((o) => {
+          {visible.map((o) => {
             const items = (o.items as OrderItem[]) ?? [];
             const isOpen = expanded === o.id;
             return (
@@ -315,6 +329,17 @@ export default function AdminOrders() {
               </div>
             );
           })}
+        </div>
+      )}
+
+      {visibleCount < filtered.length && (
+        <div className="mt-5 flex justify-center">
+          <button
+            onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+            className="rounded-full border border-blush-200 bg-white px-8 py-2.5 text-sm font-bold text-plum-900 transition hover:border-blush-400 hover:bg-blush-50"
+          >
+            تحميل المزيد ({filtered.length - visibleCount} متبقٍ)
+          </button>
         </div>
       )}
     </div>
