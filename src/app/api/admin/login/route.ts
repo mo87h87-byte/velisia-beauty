@@ -1,13 +1,12 @@
 import { cookies } from "next/headers";
 import {
-  ADMIN_PASSWORD,
   ADMIN_TOKEN_MAX_AGE_MS,
   COOKIE_NAME,
   CSRF_COOKIE_NAME,
   createToken,
   createCsrfToken,
-  timingSafeStringEqual,
 } from "@/lib/auth";
+import { verifyAdminPassword } from "@/lib/admin-password";
 import { isRateLimited, recordLoginAttempt } from "@/lib/customer-auth";
 
 const COOKIE_MAX_AGE_SECONDS = Math.floor(ADMIN_TOKEN_MAX_AGE_MS / 1000);
@@ -31,7 +30,7 @@ export async function POST(request: Request) {
     }
 
     const { password } = await request.json();
-    if (typeof password !== "string" || !timingSafeStringEqual(password.trim(), ADMIN_PASSWORD)) {
+    if (typeof password !== "string" || !(await verifyAdminPassword(password.trim()))) {
       await recordLoginAttempt(key, false);
       return Response.json({ error: "كلمة المرور غير صحيحة" }, { status: 401 });
     }
