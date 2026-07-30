@@ -2,6 +2,17 @@ import { db } from "@/db";
 import { products, reviews, type Product, type Review } from "@/db/schema";
 import { asc, desc, eq } from "drizzle-orm";
 
+// Admin product forms send images either as an array or as a newline-
+// separated textarea string — normalize either shape into a clean list.
+export function parseImagesInput(raw: unknown): string[] {
+  return Array.isArray(raw)
+    ? raw.filter((i: string) => i && i.trim())
+    : String(raw || "")
+        .split("\n")
+        .map((s: string) => s.trim())
+        .filter(Boolean);
+}
+
 export async function getAllProducts(): Promise<Product[]> {
   return db.select().from(products).orderBy(desc(products.createdAt));
 }

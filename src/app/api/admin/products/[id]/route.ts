@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { products } from "@/db/schema";
 import { isAuthorized } from "@/lib/auth";
+import { parseImagesInput } from "@/lib/products";
 import { eq } from "drizzle-orm";
 
 export async function PUT(
@@ -13,12 +14,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const b = await request.json();
-    const images: string[] = Array.isArray(b.images)
-      ? b.images.filter((i: string) => i && i.trim())
-      : String(b.images || "")
-          .split("\n")
-          .map((s: string) => s.trim())
-          .filter(Boolean);
+    const images = parseImagesInput(b.images);
 
     const [updated] = await db
       .update(products)
