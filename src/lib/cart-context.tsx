@@ -67,6 +67,7 @@ interface CartContextValue {
   subtotal: number;
   shipping: number;
   total: number;
+  freeShippingThreshold: number;
   isOpen: boolean;
   openCart: () => void;
   closeCart: () => void;
@@ -75,7 +76,15 @@ interface CartContextValue {
 const CartContext = createContext<CartContextValue | null>(null);
 const STORAGE_KEY = "velisia-cart";
 
-export function CartProvider({ children }: { children: ReactNode }) {
+export function CartProvider({
+  children,
+  shippingFee = SHIPPING_FEE,
+  freeShippingThreshold = FREE_SHIPPING_THRESHOLD,
+}: {
+  children: ReactNode;
+  shippingFee?: number;
+  freeShippingThreshold?: number;
+}) {
   const [items, dispatch] = useReducer(reducer, []);
   const [isOpen, setIsOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -103,7 +112,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
     const count = items.reduce((sum, i) => sum + i.quantity, 0);
     const shipping =
-      subtotal === 0 || subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+      subtotal === 0 || subtotal >= freeShippingThreshold ? 0 : shippingFee;
     return {
       items,
       addItem: (item, quantity) => {
@@ -117,11 +126,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
       subtotal,
       shipping,
       total: subtotal + shipping,
+      freeShippingThreshold,
       isOpen,
       openCart: () => setIsOpen(true),
       closeCart: () => setIsOpen(false),
     };
-  }, [items, isOpen]);
+  }, [items, isOpen, shippingFee, freeShippingThreshold]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

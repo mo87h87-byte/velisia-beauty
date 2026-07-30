@@ -86,7 +86,7 @@ export type SiteText = {
 export const defaultSiteText: SiteText = {
   tickerLabel: "📣 آخر الأخبار",
   tickerItems: [
-    "🚚 شحن مجاني للطلبات فوق 199 ريال",
+    "🚚 شحن مجاني للطلبات فوق 300 ريال",
     "🎁 هدية مجانية مع كل طلب فوق 300 ريال",
     "🔥 خصم 40% على جميع منتجات العناية بالبشرة",
   ],
@@ -442,7 +442,7 @@ export const defaultPromoBanners: PromoBanner[] = [
   {
     id: 2,
     title: "شحن مجاني",
-    subtitle: "للطلبات فوق 199 ريال",
+    subtitle: "للطلبات فوق 300 ريال",
     buttonText: "تسوقي الآن",
     buttonLink: "/products",
     image: truckImg,

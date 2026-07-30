@@ -8,10 +8,11 @@ import AdminFontsPanel from "@/components/AdminFontsPanel";
 import AdminColorsPanel from "@/components/AdminColorsPanel";
 import AdminLayoutPanel from "@/components/AdminLayoutPanel";
 import AdminContactPanel from "@/components/AdminContactPanel";
+import AdminShippingPanel from "@/components/AdminShippingPanel";
 
 export type SettingsMap = Record<string, unknown>;
 
-type SubTab = "images" | "text" | "fonts" | "colors" | "layout" | "contact";
+type SubTab = "images" | "text" | "fonts" | "colors" | "layout" | "contact" | "shipping";
 
 const subNav: { key: SubTab; label: string; icon: string }[] = [
   { key: "images", label: "الصور", icon: "🖼️" },
@@ -20,6 +21,7 @@ const subNav: { key: SubTab; label: string; icon: string }[] = [
   { key: "colors", label: "الألوان", icon: "🎨" },
   { key: "layout", label: "ترتيب الصفحة", icon: "🧩" },
   { key: "contact", label: "التواصل", icon: "📞" },
+  { key: "shipping", label: "الشحن", icon: "🚚" },
 ];
 
 export default function AdminSettings() {
@@ -99,6 +101,7 @@ export default function AdminSettings() {
       {subTab === "colors" && <AdminColorsPanel settings={settings} onSave={saveSetting} />}
       {subTab === "layout" && <AdminLayoutPanel settings={settings} onSave={saveSetting} />}
       {subTab === "contact" && <AdminContactPanel settings={settings} onSave={saveSetting} />}
+      {subTab === "shipping" && <AdminShippingPanel settings={settings} onSave={saveSetting} />}
 
       {/* debug hint during development; not shown to end users of the store */}
       <p className="mt-8 text-xs text-plum-900/30">

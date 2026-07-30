@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/format";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 
 export default function CartDrawer() {
   const {
@@ -16,10 +15,11 @@ export default function CartDrawer() {
     subtotal,
     shipping,
     total,
+    freeShippingThreshold,
   } = useCart();
 
-  const remaining = Math.max(0, FREE_SHIPPING_THRESHOLD - subtotal);
-  const progress = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
+  const remaining = Math.max(0, freeShippingThreshold - subtotal);
+  const progress = Math.min(100, (subtotal / freeShippingThreshold) * 100);
   const pathname = usePathname();
 
   if (pathname?.startsWith("/admin")) return null;

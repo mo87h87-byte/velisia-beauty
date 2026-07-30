@@ -1,7 +1,7 @@
 import { db } from "@/db";
 import { orders, products } from "@/db/schema";
 import { inArray } from "drizzle-orm";
-import { FREE_SHIPPING_THRESHOLD, SHIPPING_FEE } from "@/lib/constants";
+import { getShippingSettings } from "@/lib/shipping-settings";
 
 interface IncomingItem {
   id: number;
@@ -105,7 +105,8 @@ export async function POST(request: Request) {
     });
 
     const subtotal = cleanItems.reduce((s, i) => s + i.price * i.quantity, 0);
-    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_FEE;
+    const { fee: shippingFee, freeThreshold } = await getShippingSettings();
+    const shipping = subtotal >= freeThreshold ? 0 : shippingFee;
     const total = subtotal + shipping;
 
     const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();

@@ -40,6 +40,7 @@ import { settings } from "@/db/schema";
 import { inArray } from "drizzle-orm";
 import { type Theme, defaultTheme, buildThemeCss, mergeShades } from "@/lib/site-defaults";
 import { CartProvider } from "@/lib/cart-context";
+import { getShippingSettings } from "@/lib/shipping-settings";
 import { AccountProvider } from "@/lib/account-context";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -386,6 +387,7 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
     .where(inArray(settings.key, ["fonts", "theme"]));
   const fontsRow = rows.find((r) => r.key === "fonts");
   const themeRow = rows.find((r) => r.key === "theme");
+  const shippingSettings = await getShippingSettings();
 
   const fontsData = fontsRow?.value as
     | { bodyFontId?: string; displayFontId?: string }
@@ -434,7 +436,10 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
       </head>
       <body className={`${allFontVariables} font-sans antialiased`}>
         <AccountProvider>
-          <CartProvider>
+          <CartProvider
+            shippingFee={shippingSettings.fee}
+            freeShippingThreshold={shippingSettings.freeThreshold}
+          >
             <Header />
             <main className="min-h-screen">{children}</main>
             <Footer />

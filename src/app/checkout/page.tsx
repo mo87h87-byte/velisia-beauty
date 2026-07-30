@@ -6,7 +6,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { useAccount } from "@/lib/account-context";
 import { formatPrice } from "@/lib/format";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 
 const cities = [
   // منطقة الرياض
@@ -58,7 +57,7 @@ declare global {
 }
 
 function CheckoutPageInner() {
-  const { items, subtotal, shipping, total, clear } = useCart();
+  const { items, subtotal, shipping, total, clear, freeShippingThreshold } = useCart();
   const { customer } = useAccount();
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -457,9 +456,9 @@ function CheckoutPageInner() {
                 <span>الشحن</span>
                 <span className="font-semibold">{shipping === 0 ? "مجاني" : formatPrice(shipping)}</span>
               </div>
-              {subtotal < FREE_SHIPPING_THRESHOLD && (
+              {subtotal < freeShippingThreshold && (
                 <p className="text-xs text-blush-500">
-                  أضيفي بـ {formatPrice(FREE_SHIPPING_THRESHOLD - subtotal)} لشحن مجاني
+                  أضيفي بـ {formatPrice(freeShippingThreshold - subtotal)} لشحن مجاني
                 </p>
               )}
               <div className="flex justify-between border-t border-dashed border-blush-200 pt-3 text-base font-extrabold text-plum-900">
