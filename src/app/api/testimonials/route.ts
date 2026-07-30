@@ -1,5 +1,6 @@
 import { db } from "@/db";
 import { testimonials } from "@/db/schema";
+import { clampRating } from "@/lib/format";
 
 export async function POST(request: Request) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
       return Response.json({ error: "بيانات غير صحيحة" }, { status: 400 });
     }
 
-    const safeRating = Math.min(5, Math.max(1, Number(rating) || 5));
+    const safeRating = clampRating(rating);
 
     const [testimonial] = await db
       .insert(testimonials)
