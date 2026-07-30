@@ -10,8 +10,6 @@ export const metadata: Metadata = {
 const methods = [
   { icon: "💵", title: "الدفع عند الاستلام", text: "ادفعي نقداً عند وصول طلبك إلى باب منزلك. متاح في جميع مدن المملكة." },
   { icon: "💳", title: "البطاقات الائتمانية ومدى", text: "نقبل فيزا، ماستركارد، ومدى. دفع آمن ومشفّر بالكامل." },
-  { icon: "", title: "Apple Pay", text: "ادفعي بلمسة واحدة عبر Apple Pay بسرعة وأمان." },
-  { icon: "📱", title: "STC Pay", text: "ادفعي بسهولة عبر محفظة STC Pay الرقمية." },
 ];
 
 export default function PaymentPage() {

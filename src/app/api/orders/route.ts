@@ -62,6 +62,12 @@ export async function POST(request: Request) {
       return Response.json({ error: "يرجى تعبئة جميع الحقول المطلوبة" }, { status: 400 });
     }
 
+    // Only methods actually offered at checkout — Apple Pay / STC Pay were
+    // removed from the UI since they were never wired to a real gateway.
+    if (paymentMethod && paymentMethod !== "cod" && paymentMethod !== "card") {
+      return Response.json({ error: "طريقة الدفع غير مدعومة" }, { status: 400 });
+    }
+
     const requestedItems = (items as IncomingItem[]).map((i) => ({
       id: Number(i.id),
       quantity: Math.max(1, Number(i.quantity) || 1),

@@ -65,7 +65,6 @@ function CheckoutPageInner() {
   const [step, setStep] = useState<1 | 2>(1);
   const [payment, setPayment] = useState("cod");
   const [loading, setLoading] = useState(false);
-  const [processingMsg, setProcessingMsg] = useState("");
   const [error, setError] = useState("");
   const [orderNumber, setOrderNumber] = useState<string | null>(null);
   const [verifyingCallback, setVerifyingCallback] = useState(false);
@@ -198,26 +197,14 @@ function CheckoutPageInner() {
     setError("");
     setLoading(true);
     try {
-      // Simulate authorization for wallet-style methods (card is handled by Moyasar itself).
-      if (payment !== "cod") {
-        setProcessingMsg(
-          payment === "applepay"
-            ? "جاري التأكيد عبر Apple Pay..."
-            : "جاري التأكيد عبر STC Pay...",
-        );
-        await new Promise((r) => setTimeout(r, 1600));
-      }
-
+      // This flow only ever runs for "cod" — card payments are handled
+      // separately by the Moyasar hosted form above.
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
           paymentMethod: payment,
-          // Apple Pay / STC Pay are not yet connected to a real payment
-          // gateway — orders always start as "pending" until a real
-          // confirmation flow is wired up. Only the card flow (verified
-          // against Moyasar above) is marked "paid" automatically.
           paymentStatus: "pending",
           items,
         }),
@@ -231,7 +218,6 @@ function CheckoutPageInner() {
       setError(err instanceof Error ? err.message : "حدث خطأ، حاولي مرة أخرى");
     } finally {
       setLoading(false);
-      setProcessingMsg("");
     }
   };
 
@@ -345,8 +331,6 @@ function CheckoutPageInner() {
                   {[
                     { key: "cod", icon: "💵", label: "الدفع عند الاستلام", desc: "ادفعي نقداً عند وصول الطلب" },
                     { key: "card", icon: "💳", label: "بطاقة مدى / ائتمانية", desc: "فيزا، ماستركارد، مدى" },
-                    { key: "applepay", icon: "", label: "Apple Pay", desc: "دفع سريع وآمن" },
-                    { key: "stcpay", icon: "📱", label: "STC Pay", desc: "المحفظة الرقمية" },
                   ].map((m) => (
                     <label
                       key={m.key}
@@ -368,22 +352,6 @@ function CheckoutPageInner() {
                     <div className="mysr-form" />
                     <p className="mt-3 flex items-center gap-1.5 text-xs text-plum-900/50">
                       🔒 بيانات بطاقتك تُرسل مباشرة إلى Moyasar بشكل آمن ومشفّر.
-                    </p>
-                  </div>
-                )}
-                {payment === "applepay" && (
-                  <div className="mt-4 rounded-2xl bg-black p-5 text-center text-white">
-                    <p className="text-lg font-bold"> Pay</p>
-                    <p className="mt-1 text-xs text-white/70">
-                      سيتم تأكيد الدفع بلمسة واحدة عند تأكيد الطلب
-                    </p>
-                  </div>
-                )}
-                {payment === "stcpay" && (
-                  <div className="mt-4 rounded-2xl bg-gradient-to-l from-purple-600 to-fuchsia-600 p-5 text-center text-white">
-                    <p className="text-lg font-bold">STC Pay 📱</p>
-                    <p className="mt-1 text-xs text-white/80">
-                      سيصلك إشعار على تطبيق STC Pay لتأكيد الدفع
                     </p>
                   </div>
                 )}
@@ -414,11 +382,7 @@ function CheckoutPageInner() {
                   {loading && (
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
                   )}
-                  {loading
-                    ? processingMsg || "جاري تأكيد الطلب..."
-                    : payment === "cod"
-                      ? `تأكيد الطلب — ${formatPrice(total)}`
-                      : `ادفعي الآن — ${formatPrice(total)}`}
+                  {loading ? "جاري تأكيد الطلب..." : `تأكيد الطلب — ${formatPrice(total)}`}
                 </button>
               )}
             </div>
