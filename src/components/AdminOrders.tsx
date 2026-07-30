@@ -189,17 +189,34 @@ export default function AdminOrders() {
                 {isOpen && (
                   <div className="border-t border-blush-50 bg-blush-50/40 p-4">
                     <div className="grid gap-4 lg:grid-cols-3">
-                      {/* Customer */}
-                      <div className="rounded-xl bg-white p-4 text-sm">
-                        <h3 className="mb-2 font-bold text-plum-900">بيانات العميل</h3>
-                        <p className="text-plum-900/70">👤 {o.customerName}</p>
-                        <p className="text-plum-900/70" dir="ltr">📱 {o.phone}</p>
-                        <p className="text-plum-900/70" dir="ltr">✉️ {o.email}</p>
-                        <p className="mt-1 text-plum-900/70">📍 {o.city}، {o.address}</p>
-                        {o.notes && <p className="mt-1 text-plum-900/60">📝 {o.notes}</p>}
-                        <p className="mt-2 text-xs text-plum-900/50">
-                          طريقة الدفع: {PAYMENT_METHOD_LABELS[o.paymentMethod] ?? o.paymentMethod}
-                        </p>
+                      <div className="space-y-4">
+                        {/* Customer */}
+                        <div className="rounded-xl bg-white p-4 text-sm">
+                          <h3 className="mb-2 font-bold text-plum-900">بيانات العميل</h3>
+                          <p className="text-plum-900/70">👤 {o.customerName}</p>
+                          <p className="text-plum-900/70" dir="ltr">📱 {o.phone}</p>
+                          <p className="text-plum-900/70" dir="ltr">✉️ {o.email}</p>
+                          <p className="mt-1 text-plum-900/70">📍 {o.city}، {o.address}</p>
+                          {o.notes && <p className="mt-1 text-plum-900/60">📝 {o.notes}</p>}
+                          <p className="mt-2 text-xs text-plum-900/50">
+                            طريقة الدفع: {PAYMENT_METHOD_LABELS[o.paymentMethod] ?? o.paymentMethod}
+                          </p>
+                        </div>
+
+                        {/* Shipping */}
+                        {(o.trackingNumber || o.carrier) && (
+                          <div className="rounded-xl bg-white p-4 text-sm">
+                            <h3 className="mb-2 font-bold text-plum-900">معلومات الشحن</h3>
+                            {o.carrier && (
+                              <p className="text-plum-900/70">🚚 {o.carrier}</p>
+                            )}
+                            {o.trackingNumber && (
+                              <p className="mt-1 text-plum-900/70" dir="ltr">
+                                🔖 {o.trackingNumber}
+                              </p>
+                            )}
+                          </div>
+                        )}
                       </div>
 
                       {/* Items */}
