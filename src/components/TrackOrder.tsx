@@ -32,6 +32,7 @@ const timelineIcons: Record<string, string> = {
 
 export default function TrackOrder() {
   const [orderNumber, setOrderNumber] = useState("");
+  const [phone, setPhone] = useState("");
   const [order, setOrder] = useState<TrackedOrder | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -40,8 +41,8 @@ export default function TrackOrder() {
     e.preventDefault();
     setError("");
     setOrder(null);
-    if (!orderNumber.trim()) {
-      setError("يرجى إدخال رقم الطلب");
+    if (!orderNumber.trim() || !phone.trim()) {
+      setError("يرجى إدخال رقم الطلب ورقم الجوال");
       return;
     }
     setLoading(true);
@@ -49,7 +50,7 @@ export default function TrackOrder() {
       const res = await fetch("/api/track", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderNumber }),
+        body: JSON.stringify({ orderNumber, phone }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "خطأ");
@@ -67,26 +68,38 @@ export default function TrackOrder() {
   return (
     <div>
       <form onSubmit={track} className="rounded-3xl border border-blush-100 bg-white p-6 shadow-sm sm:p-8">
-        <label className="mb-2 block text-sm font-semibold text-plum-900">رقم الطلب</label>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <input
-            value={orderNumber}
-            onChange={(e) => setOrderNumber(e.target.value)}
-            placeholder="مثال: VLS-12345678"
-            className="w-full rounded-full border border-blush-200 bg-white px-5 py-3 text-sm outline-none focus:border-blush-400"
-            dir="ltr"
-          />
-          <button
-            disabled={loading}
-            className="flex items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-l from-blush-500 to-blush-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90 disabled:opacity-60"
-          >
-            {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />}
-            تتبّعي الطلب
-          </button>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-plum-900">رقم الطلب</label>
+            <input
+              value={orderNumber}
+              onChange={(e) => setOrderNumber(e.target.value)}
+              placeholder="مثال: VLS-12345678"
+              className="w-full rounded-full border border-blush-200 bg-white px-5 py-3 text-sm outline-none focus:border-blush-400"
+              dir="ltr"
+            />
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-semibold text-plum-900">رقم الجوال المسجّل بالطلب</label>
+            <input
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="مثال: 05xxxxxxxx"
+              className="w-full rounded-full border border-blush-200 bg-white px-5 py-3 text-sm outline-none focus:border-blush-400"
+              dir="ltr"
+            />
+          </div>
         </div>
+        <button
+          disabled={loading}
+          className="mt-4 flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-full bg-gradient-to-l from-blush-500 to-blush-600 px-8 py-3 text-sm font-bold text-white shadow-lg shadow-blush-300/50 transition hover:opacity-90 disabled:opacity-60 sm:w-auto"
+        >
+          {loading && <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />}
+          تتبّعي الطلب
+        </button>
         {error && <p className="mt-3 text-sm text-error">{error}</p>}
         <p className="mt-3 text-xs text-plum-900/50">
-          💡 تجدين رقم الطلب في رسالة التأكيد أو صفحة نجاح الطلب.
+          💡 تجدين رقم الطلب في رسالة التأكيد أو صفحة نجاح الطلب، ورقم الجوال هو نفس الرقم اللي استخدمتيه وقت الطلب.
         </p>
       </form>
 
