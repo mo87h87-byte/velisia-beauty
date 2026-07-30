@@ -6,6 +6,7 @@ import { desc } from "drizzle-orm";
 import { toNumber } from "@/lib/format";
 import { isCronAuthorized } from "@/lib/auth";
 import { getStalePendingOrders, getLowStockProducts } from "@/lib/admin";
+import { wrapEmailShell } from "@/lib/email-template";
 
 // ---------------------------------------------------------------------------
 // إعدادات عامة
@@ -230,26 +231,7 @@ function buildHtml(r: Awaited<ReturnType<typeof buildReport>>): string {
     </table>`
       : "";
 
-  return `<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f7f4f5;font-family:Tahoma,Arial,sans-serif;" dir="rtl">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4f5;padding:24px 12px;">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:620px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-
-        <tr>
-          <td style="background:linear-gradient(135deg,#c96a8c,#7a2440);padding:26px 24px;text-align:center;">
-            <div style="font-size:22px;font-weight:bold;color:#ffffff;letter-spacing:1px;">Velisia Beauty</div>
-            <div style="font-size:14px;color:#f6dbe4;margin-top:6px;">التقرير الأسبوعي للمبيعات</div>
-            <div style="font-size:12px;color:#eec3d2;margin-top:4px;">${r.periodFrom} — ${r.periodTo}</div>
-          </td>
-        </tr>
-
-        <tr>
-          <td style="padding:24px;">
-
-            <table width="100%" cellpadding="0" cellspacing="6" style="border-collapse:separate;">
+  const body = `<table width="100%" cellpadding="0" cellspacing="6" style="border-collapse:separate;">
               <tr>
                 ${statCard("الطلبات", String(r.orderCount), r.orderCount, r.lastOrderCount)}
                 ${statCard("إجمالي المبيعات", formatSAR(r.revenue), r.revenue, r.lastRevenue)}
@@ -280,29 +262,16 @@ function buildHtml(r: Awaited<ReturnType<typeof buildReport>>): string {
               ${lowStockRows}
             </table>
 
-            ${pendingBlock}
+            ${pendingBlock}`;
 
-            <div style="text-align:center;margin-top:30px;">
-              <a href="https://velisiabeauty.com/admin"
-                 style="display:inline-block;background:#7a2440;color:#ffffff;text-decoration:none;padding:12px 30px;border-radius:8px;font-size:14px;">
-                فتح لوحة التحكم
-              </a>
-            </div>
-
-          </td>
-        </tr>
-
-        <tr>
-          <td style="background:#fdf2f6;padding:16px;text-align:center;font-size:11px;color:#a08b95;">
-            تقرير تلقائي من نظام Velisia Beauty · يُرسل كل يوم سبت
-          </td>
-        </tr>
-
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+  return wrapEmailShell(body, {
+    subheadLines: ["التقرير الأسبوعي للمبيعات", `${r.periodFrom} — ${r.periodTo}`],
+    maxWidth: 620,
+    bodyPadding: "24px",
+    cta: { href: "https://velisiabeauty.com/admin", label: "فتح لوحة التحكم", marginTop: 30 },
+    blankLineAfterCta: true,
+    footerText: "تقرير تلقائي من نظام Velisia Beauty · يُرسل كل يوم سبت",
+  });
 }
 
 // ---------------------------------------------------------------------------

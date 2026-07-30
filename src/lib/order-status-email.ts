@@ -1,3 +1,5 @@
+import { wrapEmailShell } from "@/lib/email-template";
+
 interface OrderEmailData {
   orderNumber: string;
   customerName: string;
@@ -6,46 +8,14 @@ interface OrderEmailData {
 }
 
 function wrapEmail(headline: string, subhead: string, bodyHtml: string): string {
-  return `<!DOCTYPE html>
-<html dir="rtl" lang="ar">
-<head><meta charset="UTF-8"></head>
-<body style="margin:0;padding:0;background:#f7f4f5;font-family:Tahoma,Arial,sans-serif;" dir="rtl">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#f7f4f5;padding:24px 12px;">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,0.05);">
-
-        <tr>
-          <td style="background:linear-gradient(135deg,#c96a8c,#7a2440);padding:26px 24px;text-align:center;">
-            <div style="font-size:22px;font-weight:bold;color:#ffffff;letter-spacing:1px;">Velisia Beauty</div>
-            <div style="font-size:14px;color:#f6dbe4;margin-top:6px;">${subhead}</div>
-          </td>
-        </tr>
-
-        <tr>
-          <td style="padding:28px 24px;">
-            <h2 style="font-size:18px;color:#7a2440;margin:0 0 14px;">${headline}</h2>
-            ${bodyHtml}
-
-            <div style="text-align:center;margin-top:28px;">
-              <a href="https://velisiabeauty.com/pages/track-order"
-                 style="display:inline-block;background:#7a2440;color:#ffffff;text-decoration:none;padding:12px 30px;border-radius:8px;font-size:14px;">
-                تتبّعي طلبك
-              </a>
-            </div>
-          </td>
-        </tr>
-
-        <tr>
-          <td style="background:#fdf2f6;padding:16px;text-align:center;font-size:11px;color:#a08b95;">
-            Velisia Beauty · إشعار تلقائي بخصوص طلبك
-          </td>
-        </tr>
-
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`;
+  return wrapEmailShell(bodyHtml, {
+    subheadLines: [subhead],
+    maxWidth: 520,
+    bodyPadding: "28px 24px",
+    headline,
+    cta: { href: "https://velisiabeauty.com/pages/track-order", label: "تتبّعي طلبك", marginTop: 28 },
+    footerText: "Velisia Beauty · إشعار تلقائي بخصوص طلبك",
+  });
 }
 
 function shippingDetailsRow(data: OrderEmailData): string {
