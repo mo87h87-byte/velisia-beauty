@@ -91,6 +91,7 @@ export default function Footer() {
           <ul className="space-y-2.5 text-sm text-blush-200">
             <li><Link href="/pages/track-order" className="transition hover:text-white">تتبع الطلب</Link></li>
             <li><Link href="/pages/payment" className="transition hover:text-white">طرق الدفع</Link></li>
+            <li><Link href="/pages/shipping" className="transition hover:text-white">سياسة الشحن والتوصيل</Link></li>
             <li><Link href="/pages/returns" className="transition hover:text-white">سياسة الإرجاع والاستبدال</Link></li>
             <li><Link href="/pages/contact" className="transition hover:text-white">تواصلي معنا</Link></li>
           </ul>

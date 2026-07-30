@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ShoppingBag, Eye, Repeat, Share2, Check } from "lucide-react";
+import { ShoppingBag, Eye, Share2, Check } from "lucide-react";
 import { useCart } from "@/lib/cart-context";
 
 interface ProductQuickActionsProps {
@@ -50,11 +50,6 @@ export default function ProductQuickActions({
     // مكان مستقبلي لفتح نافذة عرض سريع للمنتج
   };
 
-  const handleCompare = (e: React.MouseEvent) => {
-    stop(e);
-    // مكان مستقبلي لإضافة المنتج لقائمة المقارنة
-  };
-
   const handleShare = (e: React.MouseEvent) => {
     stop(e);
     if (navigator.share) {
@@ -84,14 +79,6 @@ export default function ProductQuickActions({
         className="grid h-7 w-7 place-items-center rounded-full bg-plum-50 text-plum-900/60 transition hover:bg-blush-500 hover:text-white"
       >
         <Eye size={13} />
-      </button>
-      <button
-        type="button"
-        onClick={handleCompare}
-        aria-label="مقارنة"
-        className="grid h-7 w-7 place-items-center rounded-full bg-plum-50 text-plum-900/60 transition hover:bg-blush-500 hover:text-white"
-      >
-        <Repeat size={13} />
       </button>
       <button
         type="button"
