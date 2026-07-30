@@ -7,7 +7,7 @@ export interface DashboardStats {
   newOrders: number;
   productCount: number;
   reviewCount: number;
-  lowStock: { id: number; name: string; stock: number }[];
+  lowStock: { id: number; name: string; brand: string; stock: number }[];
   topCategories: { category: string; count: number }[];
   recentOrders: Order[];
   stalePendingOrders: Order[];

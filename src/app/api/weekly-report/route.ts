@@ -5,6 +5,7 @@ import { orders, products } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import { toNumber } from "@/lib/format";
 import { isCronAuthorized } from "@/lib/auth";
+import { getStalePendingOrders, getLowStockProducts } from "@/lib/admin";
 
 // ---------------------------------------------------------------------------
 // إعدادات عامة
@@ -14,7 +15,6 @@ const REPORT_DAY = 6; // السبت (0 = الأحد)
 const RIYADH_OFFSET_MS = 3 * 60 * 60 * 1000; // UTC+3
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-const LOW_STOCK_LIMIT = 10; // نفس شرط لوحة التحكم
 
 interface OrderItem {
   id: number;
@@ -131,25 +131,10 @@ async function buildReport() {
   );
 
   // ---- المخزون المنخفض ----
-  const lowStock = allProducts
-    .filter((p) => p.stock <= LOW_STOCK_LIMIT)
-    .sort((a, b) => a.stock - b.stock)
-    .slice(0, 10)
-    .map((p) => ({ name: p.name, brand: p.brand, stock: p.stock }));
+  const lowStock = getLowStockProducts(allProducts, 10);
 
   // ---- الطلبات المعلّقة في الدفع ----
-  const stalePending = allOrders
-    .filter(
-      (o) =>
-        o.paymentStatus === "pending" &&
-        o.status !== "cancelled" &&
-        now - new Date(o.createdAt).getTime() > ONE_DAY_MS,
-    )
-    .sort(
-      (a, b) =>
-        new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
-    )
-    .slice(0, 10);
+  const stalePending = getStalePendingOrders(allOrders, 10);
 
   return {
     periodFrom: formatDate(new Date(weekStart)),

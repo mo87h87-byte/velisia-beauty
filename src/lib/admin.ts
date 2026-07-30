@@ -1,5 +1,13 @@
 import { db } from "@/db";
-import { orders, products, reviews, messages, type Order, type Message } from "@/db/schema";
+import {
+  orders,
+  products,
+  reviews,
+  messages,
+  type Order,
+  type Message,
+  type Product,
+} from "@/db/schema";
 import { desc, sql } from "drizzle-orm";
 import { toNumber } from "./format";
 import type { DashboardStats } from "./admin-types";
@@ -7,6 +15,35 @@ import type { DashboardStats } from "./admin-types";
 export type { DashboardStats } from "./admin-types";
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+const LOW_STOCK_LIMIT = 10;
+
+// Orders still awaiting payment more than a day after creation, and not yet
+// cancelled — these likely need a manual follow-up or cancellation. Shared
+// between the admin dashboard and the weekly email report.
+export function getStalePendingOrders(allOrders: Order[], limit?: number): Order[] {
+  const now = Date.now();
+  const filtered = allOrders
+    .filter(
+      (o) =>
+        o.paymentStatus === "pending" &&
+        o.status !== "cancelled" &&
+        now - new Date(o.createdAt).getTime() > ONE_DAY_MS,
+    )
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  return limit ? filtered.slice(0, limit) : filtered;
+}
+
+// Shared between the admin dashboard and the weekly email report.
+export function getLowStockProducts(
+  allProducts: Product[],
+  limit: number,
+): { id: number; name: string; brand: string; stock: number }[] {
+  return allProducts
+    .filter((p) => p.stock <= LOW_STOCK_LIMIT)
+    .sort((a, b) => a.stock - b.stock)
+    .slice(0, limit)
+    .map((p) => ({ id: p.id, name: p.name, brand: p.brand, stock: p.stock }));
+}
 
 export async function getAllOrders(): Promise<Order[]> {
   return db.select().from(orders).orderBy(desc(orders.createdAt));
@@ -29,23 +66,8 @@ export async function getDashboardStats(): Promise<DashboardStats> {
     .reduce((s, o) => s + toNumber(o.total), 0);
   const newOrders = allOrders.filter((o) => o.status === "new").length;
 
-  const lowStock = allProducts
-    .filter((p) => p.stock <= 10)
-    .sort((a, b) => a.stock - b.stock)
-    .slice(0, 5)
-    .map((p) => ({ id: p.id, name: p.name, stock: p.stock }));
-
-  // Orders still awaiting payment more than a day after creation, and not
-  // yet cancelled — these likely need a manual follow-up or cancellation.
-  const now = Date.now();
-  const stalePendingOrders = allOrders
-    .filter(
-      (o) =>
-        o.paymentStatus === "pending" &&
-        o.status !== "cancelled" &&
-        now - new Date(o.createdAt).getTime() > ONE_DAY_MS,
-    )
-    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+  const lowStock = getLowStockProducts(allProducts, 5);
+  const stalePendingOrders = getStalePendingOrders(allOrders);
 
   const catMap = new Map<string, number>();
   for (const p of allProducts) {
