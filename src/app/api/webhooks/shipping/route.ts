@@ -3,6 +3,8 @@ import { orders } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { timingSafeEqual } from "crypto";
 import { ORDER_STATUSES } from "@/lib/order-status";
+import { sendEmail } from "@/lib/gmail";
+import { buildShippedEmail, buildDeliveredEmail } from "@/lib/order-status-email";
 
 // Different carriers use different status vocabularies; map them onto the
 // storefront's own order statuses so one endpoint can serve all of them.
@@ -81,6 +83,25 @@ export async function POST(request: Request) {
       .set(patch)
       .where(eq(orders.orderNumber, orderNumber))
       .returning();
+
+    const justShipped = mappedStatus === "shipped" && current.status !== "shipped";
+    const justDelivered = mappedStatus === "delivered" && current.status !== "delivered";
+    if ((justShipped || justDelivered) && updated.email) {
+      try {
+        const emailData = {
+          orderNumber: updated.orderNumber,
+          customerName: updated.customerName,
+          carrier: updated.carrier,
+          trackingNumber: updated.trackingNumber,
+        };
+        const { subject, html } = justShipped
+          ? buildShippedEmail(emailData)
+          : buildDeliveredEmail(emailData);
+        await sendEmail(updated.email, subject, html);
+      } catch (err) {
+        console.error("shipping status email failed:", err);
+      }
+    }
 
     return Response.json({ order: updated });
   } catch (err) {

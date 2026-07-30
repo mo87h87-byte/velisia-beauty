@@ -76,3 +76,30 @@ export async function getGmailClient() {
 
   return google.gmail({ version: "v1", auth: oauth2Client });
 }
+
+// إرسال إيميل HTML عام عن طريق حساب Gmail المتصل
+export async function sendEmail(to: string, subject: string, html: string) {
+  const encodedSubject = `=?UTF-8?B?${Buffer.from(subject).toString("base64")}?=`;
+
+  const raw = [
+    `To: ${to}`,
+    `Subject: ${encodedSubject}`,
+    "MIME-Version: 1.0",
+    "Content-Type: text/html; charset=UTF-8",
+    "Content-Transfer-Encoding: base64",
+    "",
+    Buffer.from(html, "utf-8").toString("base64"),
+  ].join("\n");
+
+  const encodedMessage = Buffer.from(raw)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+  const gmail = await getGmailClient();
+  await gmail.users.messages.send({
+    userId: "me",
+    requestBody: { raw: encodedMessage },
+  });
+}
