@@ -78,6 +78,18 @@ export default async function ProductPage({
           },
         }
       : {}),
+    ...(data.reviews.length > 0
+      ? {
+          review: data.reviews.map((r) => ({
+            "@type": "Review",
+            author: { "@type": "Person", name: r.author },
+            reviewRating: { "@type": "Rating", ratingValue: r.rating },
+            name: r.title,
+            reviewBody: r.comment,
+            datePublished: r.createdAt.toISOString(),
+          })),
+        }
+      : {}),
   };
 
   return (
