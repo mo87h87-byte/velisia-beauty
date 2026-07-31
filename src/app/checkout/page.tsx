@@ -189,6 +189,23 @@ function CheckoutPageInner() {
           // so it can find this same order without depending on the
           // shopper's browser ever coming back.
           metadata: { order_number: data.order.orderNumber },
+          // Fires right after Moyasar creates the payment, before any 3-D
+          // Secure redirect — save the payment id now (best-effort) so the
+          // reconciliation cron has something to check even if the
+          // shopper's connection drops before they ever come back.
+          on_completed: async (payment: { id?: string }) => {
+            if (!payment?.id) return;
+            try {
+              await fetch("/api/orders/save-payment-id", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ orderNumber: data.order.orderNumber, paymentId: payment.id }),
+              });
+            } catch {
+              // Best-effort only — the return-trip confirm and the webhook
+              // don't depend on this having succeeded.
+            }
+          },
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "تعذر بدء عملية الدفع، حاولي مرة أخرى");

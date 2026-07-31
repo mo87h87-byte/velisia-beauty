@@ -56,6 +56,7 @@ export const orders = pgTable("orders", {
   paymentMethod: text("payment_method").notNull(),
   paymentStatus: text("payment_status").notNull().default("pending"),
   status: text("status").notNull().default("new"),
+  moyasarPaymentId: text("moyasar_payment_id"),
   items: jsonb("items").notNull(),
   subtotal: numeric("subtotal", { precision: 10, scale: 2 }).notNull(),
   shipping: numeric("shipping", { precision: 10, scale: 2 }).notNull(),
