@@ -14,27 +14,6 @@ interface IncomingItem {
 
 const PRICE_TOLERANCE = 0.01;
 
-/**
- * Verifies a Moyasar payment is actually paid, straight from Moyasar's API —
- * never trust the client's own claim about its payment status.
- */
-async function verifyMoyasarPaid(paymentId: string): Promise<boolean> {
-  const secretKey = process.env.MOYASAR_SECRET_KEY;
-  if (!secretKey) return false;
-  const auth = Buffer.from(`${secretKey}:`).toString("base64");
-  try {
-    const res = await fetch(`https://api.moyasar.com/v1/payments/${paymentId}`, {
-      headers: { Authorization: `Basic ${auth}` },
-      cache: "no-store",
-    });
-    if (!res.ok) return false;
-    const payment = await res.json();
-    return payment.status === "paid";
-  } catch {
-    return false;
-  }
-}
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -46,7 +25,6 @@ export async function POST(request: Request) {
       address,
       notes,
       paymentMethod,
-      paymentId,
       items,
     } = body ?? {};
 
@@ -118,23 +96,16 @@ export async function POST(request: Request) {
     const randomPart = Math.random().toString(36).slice(2, 8).toUpperCase();
     const orderNumber = `VLS-${Date.now().toString().slice(-6)}${randomPart}`;
 
-    // An order is only ever marked "paid" after we've independently verified
-    // the payment with Moyasar ourselves — the client cannot assert this.
-    // Apple Pay / STC Pay aren't wired to a real gateway yet, so they always
-    // land as "pending" regardless of what the client sends.
-    let finalPaymentStatus: "paid" | "pending" = "pending";
-    if (paymentMethod === "card" && typeof paymentId === "string" && paymentId.trim()) {
-      const paid = await verifyMoyasarPaid(paymentId.trim());
-      if (!paid) {
-        return Response.json({ error: "تعذر تأكيد عملية الدفع" }, { status: 402 });
-      }
-      finalPaymentStatus = "paid";
-    }
-
-    // If the order arrives already paid (verified card payment), skip the
-    // "new" stage entirely and start it straight in "processing" — no
-    // manual admin step needed to notice it's ready to be prepared.
-    const initialStatus = finalPaymentStatus === "paid" ? "processing" : "new";
+    // Card orders are created here as a placeholder, *before* the shopper is
+    // handed off to Moyasar's hosted payment form — this is what makes sure a
+    // record exists even if they never come back (closed tab, failed
+    // payment, etc). Payment is never verified at this point; that only
+    // happens in /api/orders/confirm-payment once Moyasar redirects back, so
+    // this order can never be created as "paid" — only the confirm-payment
+    // route (which independently re-verifies with Moyasar) can flip it.
+    const isCard = paymentMethod === "card";
+    const finalPaymentStatus: "paid" | "pending" = "pending";
+    const initialStatus = isCard ? "awaiting_payment" : "new";
 
     const [order] = await db
       .insert(orders)

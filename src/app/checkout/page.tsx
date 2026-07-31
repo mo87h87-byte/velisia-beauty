@@ -41,7 +41,10 @@ const cities = [
   "سكاكا", "القريات", "دومة الجندل", "طبرجل",
 ];
 
-const DRAFT_KEY = "velisia_checkout_draft";
+// Holds the orderNumber of the "awaiting_payment" order created right
+// before handing off to Moyasar, so the return-trip effect can find it
+// again after the redirect (same browser, same localStorage).
+const PENDING_ORDER_KEY = "velisia_pending_order";
 
 const isValidSaudiPhone = (phone: string) => {
   const cleaned = phone.replace(/[\s-]/g, "");
@@ -95,7 +98,10 @@ function CheckoutPageInner() {
     }
   }, [customer]);
 
-  // Handle the return trip from Moyasar after a card payment attempt.
+  // Handle the return trip from Moyasar after a card payment attempt. The
+  // order itself already exists (created as "awaiting_payment" before the
+  // redirect, below) — this only confirms payment against it, it never
+  // creates a new order.
   useEffect(() => {
     const paymentId = searchParams.get("id");
     const status = searchParams.get("status");
@@ -105,38 +111,28 @@ function CheckoutPageInner() {
       setVerifyingCallback(true);
       setError("");
       try {
-        const res = await fetch(`/api/payments/verify?id=${paymentId}`);
+        const pendingOrderNumber = localStorage.getItem(PENDING_ORDER_KEY);
+        if (!pendingOrderNumber) {
+          setError("تعذر العثور على بيانات الطلب، يرجى المحاولة مرة أخرى");
+          return;
+        }
+
+        const res = await fetch("/api/orders/confirm-payment", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ orderNumber: pendingOrderNumber, paymentId }),
+        });
         const data = await res.json();
 
-        if (!res.ok || !data.paid) {
-          setError("لم تكتمل عملية الدفع، يرجى المحاولة مرة أخرى");
+        if (!res.ok) {
+          setError(data.error || "لم تكتمل عملية الدفع، يرجى المحاولة مرة أخرى");
           setStep(2);
           setPayment("card");
           return;
         }
 
-        const draftRaw = localStorage.getItem(DRAFT_KEY);
-        if (!draftRaw) {
-          setError("تعذر العثور على بيانات الطلب، يرجى المحاولة مرة أخرى");
-          return;
-        }
-        const draft = JSON.parse(draftRaw) as { form: typeof form; items: typeof items };
-
-        const orderRes = await fetch("/api/orders", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            ...draft.form,
-            paymentMethod: "card",
-            paymentId,
-            items: draft.items,
-          }),
-        });
-        const orderData = await orderRes.json();
-        if (!orderRes.ok) throw new Error(orderData.error || "خطأ");
-
-        localStorage.removeItem(DRAFT_KEY);
-        setOrderNumber(orderData.order.orderNumber);
+        localStorage.removeItem(PENDING_ORDER_KEY);
+        setOrderNumber(data.order.orderNumber);
         clear();
         router.replace("/checkout");
         window.scrollTo({ top: 0, behavior: "smooth" });
@@ -151,7 +147,11 @@ function CheckoutPageInner() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Mount the Moyasar hosted card form once the shopper selects "card".
+  // Mount the Moyasar hosted card form once the shopper selects "card". The
+  // order is created first (status "awaiting_payment") so a record exists
+  // even if the shopper never completes or returns from the Moyasar form —
+  // only /api/orders/confirm-payment (after a verified return trip) ever
+  // moves it past that state.
   useEffect(() => {
     if (payment !== "card" || step !== 2) {
       mysrInitialized.current = false;
@@ -161,21 +161,38 @@ function CheckoutPageInner() {
     if (typeof window === "undefined" || !window.Moyasar) return;
     if (!form.customerName || !form.email || !form.phone || !form.address) return;
 
-    // Save a draft so we can finalize the order after the Moyasar redirect.
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, items }));
-
     mysrInitialized.current = true;
-    window.Moyasar.init({
-      element: ".mysr-form",
-      amount: Math.round(total * 100),
-      currency: "SAR",
-      description: `طلب من velisiabeauty — ${form.customerName}`,
-      publishable_api_key: process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY,
-      callback_url:
-        typeof window !== "undefined" ? `${window.location.origin}/checkout` : "",
-      methods: ["creditcard"],
-      language: "ar",
-    });
+
+    const createPendingOrderAndInit = async () => {
+      try {
+        const res = await fetch("/api/orders", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ...form, paymentMethod: "card", items }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "تعذر إنشاء الطلب");
+
+        localStorage.setItem(PENDING_ORDER_KEY, data.order.orderNumber);
+
+        window.Moyasar!.init({
+          element: ".mysr-form",
+          amount: Math.round(total * 100),
+          currency: "SAR",
+          description: `طلب من velisiabeauty — ${form.customerName}`,
+          publishable_api_key: process.env.NEXT_PUBLIC_MOYASAR_PUBLISHABLE_KEY,
+          callback_url:
+            typeof window !== "undefined" ? `${window.location.origin}/checkout` : "",
+          methods: ["creditcard"],
+          language: "ar",
+        });
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "تعذر بدء عملية الدفع، حاولي مرة أخرى");
+        mysrInitialized.current = false;
+      }
+    };
+
+    createPendingOrderAndInit();
   }, [payment, step, total, form, items]);
 
   const goPay = (e: React.FormEvent) => {

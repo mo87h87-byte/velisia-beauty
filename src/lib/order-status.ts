@@ -1,4 +1,5 @@
 export const ORDER_STATUS_LABELS: Record<string, string> = {
+  awaiting_payment: "بانتظار الدفع بالبطاقة",
   new: "جديد",
   processing: "قيد التجهيز",
   shipped: "تم الشحن",
@@ -7,6 +8,7 @@ export const ORDER_STATUS_LABELS: Record<string, string> = {
 };
 
 export const ORDER_STATUS_COLORS: Record<string, string> = {
+  awaiting_payment: "bg-slate-100 text-slate-600",
   new: "bg-blue-100 text-blue-700",
   processing: "bg-amber-100 text-amber-700",
   shipped: "bg-purple-100 text-purple-700",
@@ -34,6 +36,7 @@ export const PAYMENT_METHOD_LABELS: Record<string, string> = {
 };
 
 export const ORDER_STATUSES = [
+  "awaiting_payment",
   "new",
   "processing",
   "shipped",
