@@ -185,6 +185,10 @@ function CheckoutPageInner() {
             typeof window !== "undefined" ? `${window.location.origin}/checkout` : "",
           methods: ["creditcard"],
           language: "ar",
+          // Echoed back on the payment object Moyasar sends to our webhook,
+          // so it can find this same order without depending on the
+          // shopper's browser ever coming back.
+          metadata: { order_number: data.order.orderNumber },
         });
       } catch (err) {
         setError(err instanceof Error ? err.message : "تعذر بدء عملية الدفع، حاولي مرة أخرى");
