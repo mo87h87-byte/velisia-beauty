@@ -61,54 +61,6 @@ export default function Header() {
 
   return (
     <header className=" w-full">
-      {/* Pearl shimmer ring system (shared with homepage) */}
-      <style>{`
-        @keyframes pearlShimmer {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes pearlTwinkle {
-          0%, 100% { opacity: .25; transform: scale(0.6); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-        .pearl-ring {
-          position: relative;
-        }
-        .pearl-ring::before {
-          content: "";
-          position: absolute;
-          inset: -3px;
-          border-radius: inherit;
-          padding: 3px;
-          background: linear-gradient(100deg,
-            #ffffff 0%, var(--color-accent-100) 12%, var(--color-accent-200) 24%,
-            #ffffff 38%, var(--color-blush-100) 52%, var(--color-accent-200) 66%,
-            #ffffff 80%, var(--color-accent-100) 100%);
-          background-size: 300% 300%;
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          animation: pearlShimmer 2.2s ease-in-out infinite;
-          filter: drop-shadow(0 0 8px var(--color-accent-300)) drop-shadow(0 0 16px var(--color-accent-400));
-          pointer-events: none;
-          z-index: 5;
-        }
-        .pearl-ring::after {
-          content: "✦";
-          position: absolute;
-          top: -9px;
-          right: 4px;
-          font-size: 11px;
-          line-height: 1;
-          color: #fff;
-          text-shadow: 0 0 6px #fff, 0 0 12px var(--color-accent-300);
-          animation: pearlTwinkle 2s ease-in-out infinite;
-          pointer-events: none;
-          z-index: 6;
-        }
-      `}</style>
-
       {/* Top bar: free shipping message + utility links + language switcher */}
       <div className="bg-gradient-to-l from-plum-900 via-blush-800 to-plum-900 text-white">
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2 text-[11px] sm:text-xs">

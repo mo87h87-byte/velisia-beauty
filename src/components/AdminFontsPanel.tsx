@@ -111,10 +111,20 @@ export default function AdminFontsPanel({ settings, onSave }: Props) {
       </div>
 
       <div className="mt-5 rounded-xl border border-blush-100 bg-blush-50/40 p-5">
-        <p style={{ fontFamily: `"${displayFont.family}", Georgia, serif` }} className="text-xl font-bold text-plum-900">
+        <p
+          className="text-xl font-bold text-plum-900"
+          ref={(el) => {
+            if (el) el.style.fontFamily = `"${displayFont.family}", Georgia, serif`;
+          }}
+        >
           جمالك يستحق الأفضل
         </p>
-        <p style={{ fontFamily: `"${bodyFont.family}", system-ui, sans-serif` }} className="mt-2 text-sm text-plum-900/70">
+        <p
+          className="mt-2 text-sm text-plum-900/70"
+          ref={(el) => {
+            if (el) el.style.fontFamily = `"${bodyFont.family}", system-ui, sans-serif`;
+          }}
+        >
           اكتشفي منتجات أصلية مختارة بعناية لبشرة أكثر إشراقاً وجمالاً
         </p>
       </div>

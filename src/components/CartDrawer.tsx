@@ -1,11 +1,14 @@
 "use client";
 
+import { useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart-context";
 import { formatPrice } from "@/lib/format";
+import { useInlineStyle } from "@/lib/use-inline-style";
 
 export default function CartDrawer() {
+  const progressBarRef = useRef<HTMLDivElement>(null);
   const {
     items,
     isOpen,
@@ -22,6 +25,8 @@ export default function CartDrawer() {
   const progress = Math.min(100, (subtotal / freeShippingThreshold) * 100);
   const pathname = usePathname();
 
+  useInlineStyle(progressBarRef, { width: `${progress}%` });
+
   if (pathname?.startsWith("/admin")) return null;
 
   return (
@@ -29,19 +34,16 @@ export default function CartDrawer() {
       {/* Overlay */}
       <div
         onClick={closeCart}
-        style={{
-          opacity: isOpen ? 1 : 0,
-          pointerEvents: isOpen ? "auto" : "none",
-        }}
-        className="fixed inset-0 z-50 bg-plum-900/40 backdrop-blur-sm transition-opacity duration-300"
+        className={`fixed inset-0 z-50 bg-plum-900/40 backdrop-blur-sm transition-opacity duration-300 ${
+          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+        }`}
       />
 
       {/* Drawer */}
       <aside
-        style={{
-          transform: isOpen ? "translateX(0)" : "translateX(-100%)",
-        }}
-        className="fixed inset-y-0 left-0 z-50 flex w-full max-w-md flex-col bg-blush-50 shadow-2xl transition-transform duration-300"
+        className={`fixed inset-y-0 left-0 z-50 flex w-full max-w-md flex-col bg-blush-50 shadow-2xl transition-transform duration-300 ${
+          isOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-blush-100 bg-white px-5 py-4">
@@ -103,8 +105,8 @@ export default function CartDrawer() {
               )}
               <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-blush-100">
                 <div
+                  ref={progressBarRef}
                   className="h-full rounded-full bg-gradient-to-l from-blush-400 to-blush-600 transition-all duration-500"
-                  style={{ width: `${progress}%` }}
                 />
               </div>
             </div>

@@ -11,5 +11,5 @@ export default function AdminKeyPage() {
     router.replace("/admin/login");
   }, [router]);
 
-  return <p style={{ padding: 40, textAlign: "center" }}>جارٍ التفعيل...</p>;
+  return <p className="p-10 text-center">جارٍ التفعيل...</p>;
 }

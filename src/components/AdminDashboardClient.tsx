@@ -183,7 +183,9 @@ export default function AdminDashboardClient({
                   <div className="h-1.5 w-full overflow-hidden rounded-full bg-blush-100">
                     <div
                       className="h-full rounded-full bg-gradient-to-l from-blush-400 to-blush-600"
-                      style={{ width: `${(c.count / stats.productCount) * 100}%` }}
+                      ref={(el) => {
+                        if (el) el.style.width = `${(c.count / stats.productCount) * 100}%`;
+                      }}
                     />
                   </div>
                 </li>

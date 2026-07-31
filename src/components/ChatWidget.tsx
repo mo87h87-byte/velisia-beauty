@@ -102,12 +102,9 @@ export default function ChatWidget() {
 
       {/* Chat window */}
       <div
-        style={{
-          opacity: isOpen ? 1 : 0,
-          pointerEvents: isOpen ? "auto" : "none",
-          transform: isOpen ? "translateY(0)" : "translateY(16px)",
-        }}
-        className="fixed bottom-24 right-6 z-40 flex h-[28rem] w-[22rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-blush-100 bg-blush-50 shadow-2xl transition-all duration-300"
+        className={`fixed bottom-24 right-6 z-40 flex h-[28rem] w-[22rem] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-blush-100 bg-blush-50 shadow-2xl transition-all duration-300 ${
+          isOpen ? "translate-y-0 opacity-100 pointer-events-auto" : "translate-y-4 opacity-0 pointer-events-none"
+        }`}
       >
         {/* Header */}
         <div className="flex items-center gap-2 border-b border-blush-100 bg-white px-4 py-3">

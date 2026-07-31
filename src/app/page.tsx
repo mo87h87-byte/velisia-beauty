@@ -432,75 +432,8 @@ export default async function HomePage() {
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-b from-blush-100 via-blush-200 to-blush-100">
-      {/* Animated luxury background + pearl shimmer ring system */}
-     <style>{`
-        @keyframes gradientShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes pearlShimmer {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
-        }
-        @keyframes pearlTwinkle {
-          0%, 100% { opacity: .25; transform: scale(0.6); }
-          50% { opacity: 1; transform: scale(1.2); }
-        }
-        @keyframes marquee {
-          0% { transform: translateX(0); }
-          100% { transform: translateX(-50%); }
-        }
-        .animate-marquee {
-          animation: marquee 20s linear infinite;
-        }
-        .pearl-ring {
-          position: relative;
-        }
-        .pearl-ring::before {
-          content: "";
-          position: absolute;
-          inset: -3px;
-          border-radius: inherit;
-          padding: 3px;
-          background: linear-gradient(100deg,
-            #ffffff 0%, var(--color-accent-100) 12%, var(--color-accent-200) 24%,
-            #ffffff 38%, var(--color-blush-100) 52%, var(--color-accent-200) 66%,
-            #ffffff 80%, var(--color-accent-100) 100%);
-          background-size: 300% 300%;
-          -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-          -webkit-mask-composite: xor;
-          mask-composite: exclude;
-          animation: pearlShimmer 2.2s ease-in-out infinite;
-          filter: drop-shadow(0 0 8px var(--color-accent-300)) drop-shadow(0 0 16px var(--color-accent-400));
-          pointer-events: none;
-          z-index: 5;
-        }
-        .pearl-ring::after {
-          content: "✦";
-          position: absolute;
-          top: -9px;
-          right: 4px;
-          font-size: 11px;
-          line-height: 1;
-          color: #fff;
-          text-shadow: 0 0 6px #fff, 0 0 12px var(--color-accent-300);
-          animation: pearlTwinkle 2s ease-in-out infinite;
-          pointer-events: none;
-          z-index: 6;
-        }
-      `}</style>
       <div className="pointer-events-none absolute inset-0 -z-0 overflow-hidden">
-        <div
-          className="absolute inset-0"
-          style={{
-            background:
-              "linear-gradient(120deg, var(--color-gold) 0%, var(--color-champagne) 15%, var(--color-blush-500) 35%, var(--color-wine-700) 55%, var(--color-accent-600) 75%, var(--color-gold) 100%)",
-            backgroundSize: "200% 200%",
-            animation: "gradientShift 12s ease-in-out infinite",
-          }}
-        />
+        <div className="absolute inset-0 hero-gradient-bg" />
       </div>
 
       {sectionOrder
