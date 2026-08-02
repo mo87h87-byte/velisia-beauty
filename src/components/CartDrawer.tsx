@@ -9,6 +9,8 @@ import { useInlineStyle } from "@/lib/use-inline-style";
 
 export default function CartDrawer() {
   const progressBarRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const drawerRef = useRef<HTMLElement>(null);
   const {
     items,
     isOpen,
@@ -26,6 +28,13 @@ export default function CartDrawer() {
   const pathname = usePathname();
 
   useInlineStyle(progressBarRef, { width: `${progress}%` });
+  useInlineStyle(overlayRef, {
+    opacity: isOpen ? "1" : "0",
+    pointerEvents: isOpen ? "auto" : "none",
+  });
+  useInlineStyle(drawerRef, {
+    transform: isOpen ? "translateX(0)" : "translateX(-100%)",
+  });
 
   if (pathname?.startsWith("/admin")) return null;
 
@@ -33,17 +42,15 @@ export default function CartDrawer() {
     <>
       {/* Overlay */}
       <div
+        ref={overlayRef}
         onClick={closeCart}
-        className={`fixed inset-0 z-50 bg-plum-900/40 backdrop-blur-sm transition-opacity duration-300 ${
-          isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
+        className="fixed inset-0 z-50 bg-plum-900/40 backdrop-blur-sm transition-opacity duration-300"
       />
 
       {/* Drawer */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-full max-w-md flex-col bg-blush-50 shadow-2xl transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        ref={drawerRef}
+        className="fixed inset-y-0 left-0 z-50 flex w-full max-w-md flex-col bg-blush-50 shadow-2xl transition-transform duration-300"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-blush-100 bg-white px-5 py-4">
